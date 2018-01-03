@@ -1,31 +1,27 @@
 {
   "compilerOptions": {
     "lib": [
-      "dom",
-      "es2015",
-      "es5"
+      "es5",
+      "es6"
     ],
+    "rootDir": ".",
     "outDir": "./build/compiled",
     "target": "es6",
     "module": "CommonJS",
     "moduleResolution": "node",
-    "rootDir": ".",
     "sourceMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "preserveConstEnums": true,
     "pretty": true,
-    // "declaration": true,
+    "declaration": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "stripInternal": true,
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
-    "allowJs": true,
     "typeRoots": [
-      // "./typings/modules",
       "./node_modules/@types"
-
     ]
   },
   "exclude": [
