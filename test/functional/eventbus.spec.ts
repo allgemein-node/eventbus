@@ -4,8 +4,8 @@ import 'reflect-metadata'
 import {suite, test, timeout} from "mocha-typescript";
 import {expect} from "chai";
 import subscribe from '../../src/decorator/subscribe';
-import EventBusMeta from '../../src/EventBusMeta';
-import {EventBus} from '../../src/EventBus';
+import EventBusMeta from '../../src/bus/EventBusMeta';
+import {EventBus} from '../../src/bus/EventBus';
 
 
 describe('', () => {

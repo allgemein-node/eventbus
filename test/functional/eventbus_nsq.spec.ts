@@ -2,7 +2,7 @@
 import 'reflect-metadata'
 import {suite, test, timeout} from "mocha-typescript";
 import {expect} from "chai";
-import {EventBus} from '../../src/EventBus';
+import {EventBus} from '../../src/bus/EventBus';
 import {NsqdEventBusAdapter} from '../../src/adapter/nsq/NsqdEventBusAdapter';
 import {INsqdReaderOptions} from '../../src/adapter/nsq/INsqdReaderOptions';
 import {INsqdWriterOptions} from '../../src/adapter/nsq/INsqdWriterOptions';

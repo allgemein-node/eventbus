@@ -1,5 +1,4 @@
-import {IPseudoObject} from '../IPseudoObject';
-import {IEventBusConfiguration} from '../IEventBusConfiguration';
+import {IEventBusConfiguration, IPseudoObject} from '../';
 
 export interface IEventBusAdapter {
 

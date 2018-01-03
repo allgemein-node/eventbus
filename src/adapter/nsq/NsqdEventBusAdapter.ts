@@ -4,11 +4,10 @@ import {IEventBusAdapter} from '../IEventBusAdapter';
 import {NsqdReader} from './NsqdReader';
 import {NsqdWriter} from './NsqdWriter';
 import {INSQPubMessage} from './INSQPubMessage';
-import {IEventBusConfiguration} from '../../IEventBusConfiguration';
 import {EventEmitter} from 'events';
 import {INSQSubMessage} from './INSQSubMessage';
-import {IPseudoObject} from '../../IPseudoObject';
 import {NsqdObject} from './NsqdObject';
+import {IEventBusConfiguration, IPseudoObject} from '../../';
 
 
 export class NsqdEventBusAdapter implements IEventBusAdapter {

@@ -1,7 +1,7 @@
 import "reflect-metadata";
-import EventBusMeta from "../EventBusMeta";
+import EventBusMeta from "../bus/EventBusMeta";
 import {isFunction} from "lodash";
-import {ISubscribeOptions} from "../ISubscribeOptions";
+import {ISubscribeOptions} from "../bus/ISubscribeOptions";
 
 
 export default function subscribe( options: ISubscribeOptions) : Function;

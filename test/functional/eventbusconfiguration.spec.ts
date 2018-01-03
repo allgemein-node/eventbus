@@ -1,13 +1,6 @@
-
-
-
-import {suite, test, timeout} from "mocha-typescript";
-import {expect} from "chai";
-import subscribe from '../../src/decorator/subscribe';
-import EventBusMeta from '../../src/EventBusMeta';
-import {EventBus} from '../../src/EventBus';
-import {EventBusConfiguration} from '../../src/EventBusConfiguration';
-import {NsqdEventBusAdapter} from '../../src/adapter/nsq/NsqdEventBusAdapter';
+import {suite, test} from 'mocha-typescript';
+import {expect} from 'chai';
+import {EventBusConfiguration} from '../../src/bus/EventBusConfiguration';
 import {DefaultEventBusAdapter} from '../../src/adapter/default/DefaultEventBusAdapter';
 
 

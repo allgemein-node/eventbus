@@ -1,6 +1,6 @@
 import {INSQPubMessage} from './INSQPubMessage';
 import {EventEmitter} from 'events';
-import {IPseudoObject} from '../../IPseudoObject';
+import {IPseudoObject} from '../../bus/IPseudoObject';
 import {CryptUtils} from '../../utils/CryptUtils';
 import Timer = NodeJS.Timer;
 import {NsqdEventBusAdapter} from './NsqdEventBusAdapter';

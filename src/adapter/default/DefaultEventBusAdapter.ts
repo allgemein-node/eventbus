@@ -1,7 +1,7 @@
 import {IEventBusAdapter} from '../IEventBusAdapter';
 import {EventEmitter} from 'events';
-import {IEventBusConfiguration} from '../../IEventBusConfiguration';
-import {IPseudoObject} from '../../IPseudoObject';
+import {IEventBusConfiguration} from '../../bus/IEventBusConfiguration';
+import {IPseudoObject} from '../../bus/IPseudoObject';
 import {CryptUtils} from '../../utils/CryptUtils';
 import {setTimeout, clearTimeout} from 'timers';
 import Timer = NodeJS.Timer;
