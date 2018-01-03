@@ -1,5 +1,5 @@
 import * as _ from 'lodash'
-import {IEventBusAdapter} from "./adapter/IEventBusAdapter";
+import {IEventBusAdapter} from "../adapter/IEventBusAdapter";
 import {ISubscriber} from "./ISubscriber";
 
 

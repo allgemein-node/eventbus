@@ -1,11 +1,11 @@
 import * as _ from 'lodash';
 import EventBusMeta from "./EventBusMeta";
 import {EventChannel} from "./EventChannel";
-import {DefaultEventBusAdapter} from "./adapter/default/DefaultEventBusAdapter";
+import {DefaultEventBusAdapter} from "../adapter/default/DefaultEventBusAdapter";
 import {EventBusConfiguration} from "./EventBusConfiguration";
 import {IEventBusConfiguration} from "./IEventBusConfiguration";
-import {CryptUtils} from './utils/CryptUtils';
-import {NsqdEventBusAdapter} from './adapter/nsq/NsqdEventBusAdapter';
+import {CryptUtils} from '../utils/CryptUtils';
+import {NsqdEventBusAdapter} from '../adapter/nsq/NsqdEventBusAdapter';
 
 
 const DEFAULT_OPTIONS: IEventBusConfiguration = {
