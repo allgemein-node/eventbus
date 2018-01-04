@@ -8,6 +8,8 @@ import {EventEmitter} from 'events';
 import {INSQSubMessage} from './INSQSubMessage';
 import {NsqdObject} from './NsqdObject';
 import {IEventBusConfiguration, IPseudoObject} from '../../';
+import {EventBusConfiguration} from '../../bus/EventBusConfiguration';
+
 
 
 export class NsqdEventBusAdapter implements IEventBusAdapter {
@@ -129,4 +131,12 @@ export class NsqdEventBusAdapter implements IEventBusAdapter {
   async close(){
     await Promise.all([this.writer.close(),this.reader.close()])
   }
+}
+
+
+try{
+  require('nsqjs');
+  EventBusConfiguration.register(NsqdEventBusAdapter);
+}catch(err){
+  console.warn('EventBus adapter nsqjs can\'t be loaded, because modul nsqjs is not installed.')
 }

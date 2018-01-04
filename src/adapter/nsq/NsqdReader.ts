@@ -1,9 +1,10 @@
+
 import * as nsqjs from 'nsqjs';
 import {ReaderConnectionConfigOptions} from 'nsqjs';
 
+
 import {INSQSubMessage} from './INSQSubMessage';
 import {EventEmitter} from 'events';
-
 
 const MESSAGE = 'message';
 const DISCARD = 'discard';
@@ -11,6 +12,9 @@ const ERROR = 'error';
 const CONNECTION_ERROR = 'connection_error';
 const NSQD_CONNECTED = 'nsqd_connected';
 const NSQD_CLOSED = 'nsqd_closed';
+
+
+
 
 
 export class NsqdReader extends EventEmitter {

@@ -1,14 +1,7 @@
 
 export * from  "./utils/CryptUtils";
 export * from  "./decorator/subscribe";
-export * from  "./adapter/nsq/INsqdWriterOptions";
 export * from  "./adapter/nsq/NsqdEventBusAdapter";
-export * from  "./adapter/nsq/NsqdWriter";
-export * from  "./adapter/nsq/NsqdReader";
-export * from  "./adapter/nsq/NsqdObject";
-export * from  "./adapter/nsq/INSQPubMessage";
-export * from  "./adapter/nsq/INsqdReaderOptions";
-export * from  "./adapter/nsq/INSQSubMessage";
 export * from  "./adapter/default/DefaultEventBusAdapter";
 export * from  "./adapter/IEventBusAdapter";
 export * from  "./bus/IPseudoObject";
