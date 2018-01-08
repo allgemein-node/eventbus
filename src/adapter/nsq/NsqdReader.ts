@@ -1,7 +1,5 @@
 
 import * as nsqjs from 'nsqjs';
-import {ReaderConnectionConfigOptions} from 'nsqjs';
-
 
 import {INSQSubMessage} from './INSQSubMessage';
 import {EventEmitter} from 'events';
@@ -18,7 +16,7 @@ const NSQD_CLOSED = 'nsqd_closed';
 
 
 export class NsqdReader extends EventEmitter {
-  options: ReaderConnectionConfigOptions;
+  options: nsqjs.ReaderConnectionConfigOptions;
 
   reader: nsqjs.Reader;
 
@@ -28,7 +26,7 @@ export class NsqdReader extends EventEmitter {
 
   channel: string;
 
-  constructor(topic: string, chanel: string, options: ReaderConnectionConfigOptions) {
+  constructor(topic: string, chanel: string, options: nsqjs.ReaderConnectionConfigOptions) {
     super();
     this.topic = topic;
     this.channel = chanel;

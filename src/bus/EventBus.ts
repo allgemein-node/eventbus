@@ -1,11 +1,10 @@
 import * as _ from 'lodash';
-import EventBusMeta from "./EventBusMeta";
-import {EventChannel} from "./EventChannel";
-import {EventBusConfiguration} from "./EventBusConfiguration";
-import {IEventBusConfiguration} from "./IEventBusConfiguration";
+import EventBusMeta from './EventBusMeta';
+import {EventChannel} from './EventChannel';
+import {EventBusConfiguration} from './EventBusConfiguration';
+import {IEventBusConfiguration} from './IEventBusConfiguration';
 import {CryptUtils} from '../utils/CryptUtils';
-import {DefaultEventBusAdapter} from "../adapter/default/DefaultEventBusAdapter";
-import {NsqdEventBusAdapter} from '../adapter/nsq/NsqdEventBusAdapter';
+import {DefaultEventBusAdapter} from '../adapter/default/DefaultEventBusAdapter';
 
 
 const DEFAULT_OPTIONS: IEventBusConfiguration = {
@@ -20,11 +19,12 @@ const DEFAULT_OPTIONS: IEventBusConfiguration = {
 EventBusConfiguration.register(DefaultEventBusAdapter);
 
 
-try{
+try {
   require('nsqjs');
+  const NsqdEventBusAdapter = require('../adapter/nsq/NsqdEventBusAdapter');
   EventBusConfiguration.register(NsqdEventBusAdapter);
-}catch(err){
-  console.warn('EventBus adapter nsqjs can\'t be loaded, because modul nsqjs is not installed.')
+} catch (err) {
+  console.warn('EventBus adapter nsqjs can\'t be loaded, because modul nsqjs is not installed.');
 }
 
 
@@ -42,7 +42,7 @@ export class EventBus {
 
 
   constructor() {
-    this.nodeId = CryptUtils.shorthash(Date.now() + CryptUtils.random(8))
+    this.nodeId = CryptUtils.shorthash(Date.now() + CryptUtils.random(8));
     this.addConfiguration(DEFAULT_OPTIONS);
   }
 
@@ -56,14 +56,14 @@ export class EventBus {
 
   static $() {
     if (!this.self) {
-      this.self = new EventBus()
+      this.self = new EventBus();
     }
     return this.self;
   }
 
 
   static get namespaces() {
-    return Object.keys(this.$().channels)
+    return Object.keys(this.$().channels);
   }
 
 
@@ -90,7 +90,7 @@ export class EventBus {
     // support multiple subsriber in one class
     let infos = EventBusMeta.$().getSubscriberInfo(o);
     if (_.isEmpty(infos)) {
-      throw new Error('registration went wrong')
+      throw new Error('registration went wrong');
     }
 
     for (let info of infos) {
@@ -103,7 +103,7 @@ export class EventBus {
   static async unregister(o: any) {
     let infos = EventBusMeta.$().getSubscriberInfo(o);
     if (_.isEmpty(infos)) {
-      throw new Error('registration went wrong')
+      throw new Error('registration went wrong');
     }
 
     for (let info of infos) {
@@ -112,7 +112,7 @@ export class EventBus {
       if (channel.size == 0) {
         channel = this.$().channels[info.namespace];
         await channel.close();
-        delete this.$().channels[info.namespace]
+        delete this.$().channels[info.namespace];
       }
     }
   }
@@ -125,11 +125,11 @@ export class EventBus {
         options && options.configurationOptions ? options.configurationOptions : null);
       try {
         let res = await channel.post(o, options);
-        resolve(res)
+        resolve(res);
       } catch (e) {
-        reject(e)
+        reject(e);
       }
-    })
+    });
   }
 
 
@@ -139,29 +139,29 @@ export class EventBus {
     let info = EventBusMeta.$().getNamespacesForEvent(o);
     if (_.isEmpty(info)) {
       let eventDef = EventBusMeta.$().registerEventClass(o.constructor);
-      info = [eventDef.namespace]
+      info = [eventDef.namespace];
     }
 
     if (info.length) {
-      self.$().inc++
+      self.$().inc++;
     }
 
     let promises: Promise<any>[] = [];
     for (let _namespace of info) {
-      promises.push(self.postOnChannel(_namespace, o, options))
+      promises.push(self.postOnChannel(_namespace, o, options));
     }
-    return Promise.all(promises)
+    return Promise.all(promises);
   }
 
-  async shutdown(){
-    for(let c in this.channels){
+  async shutdown() {
+    for (let c in this.channels) {
       let channel = this.channels[c];
       await channel.close();
     }
   }
 
   static postAndForget(o: any, options?: any): Promise<any> {
-    options = options || {}
+    options = options || {};
     _.set(options, 'ttl', 0);
     return this.post(o, options);
   }
