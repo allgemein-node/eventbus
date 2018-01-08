@@ -1,5 +1,4 @@
 
-export * from  "./utils/CryptUtils";
 export * from  "./decorator/subscribe";
 export * from  "./adapter/nsq/NsqdEventBusAdapter";
 export * from  "./adapter/default/DefaultEventBusAdapter";

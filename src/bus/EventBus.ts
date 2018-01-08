@@ -5,6 +5,7 @@ import {EventBusConfiguration} from "./EventBusConfiguration";
 import {IEventBusConfiguration} from "./IEventBusConfiguration";
 import {CryptUtils} from '../utils/CryptUtils';
 import {DefaultEventBusAdapter} from "../adapter/default/DefaultEventBusAdapter";
+import {NsqdEventBusAdapter} from '../adapter/nsq/NsqdEventBusAdapter';
 
 
 const DEFAULT_OPTIONS: IEventBusConfiguration = {
@@ -18,6 +19,13 @@ const DEFAULT_OPTIONS: IEventBusConfiguration = {
 
 EventBusConfiguration.register(DefaultEventBusAdapter);
 
+
+try{
+  require('nsqjs');
+  EventBusConfiguration.register(NsqdEventBusAdapter);
+}catch(err){
+  console.warn('EventBus adapter nsqjs can\'t be loaded, because modul nsqjs is not installed.')
+}
 
 
 export class EventBus {
