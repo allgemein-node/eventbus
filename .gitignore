@@ -68,3 +68,7 @@ typings/
 # dev stuff
 archive/
 build/
+
+
+# lock
+package-lock.json
