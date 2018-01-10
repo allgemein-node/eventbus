@@ -1,20 +1,23 @@
 import * as _ from 'lodash';
 
+
 import {IEventBusConfiguration} from './IEventBusConfiguration';
 import {IEventBusAdapter} from '../adapter/IEventBusAdapter';
 import {EventBus} from './EventBus';
-
+import {EventBusAdapterFactory} from '../adapter/EventBusAdapterFactory';
 
 
 export class EventBusConfiguration {
 
-  private static adapters: {[key:string]:Function} = {}
+  // private static adapters: { [key: string]: Function } = {};
 
   private readonly configuration: IEventBusConfiguration;
 
   private readonly _name: string;
 
-  private adapter: Function;
+  private static factory: EventBusAdapterFactory = new EventBusAdapterFactory();
+
+  private adapter: string | Function;
 
   private bus: EventBus;
 
@@ -22,15 +25,13 @@ export class EventBusConfiguration {
   constructor(bus: EventBus, cfg: IEventBusConfiguration) {
     this.configuration = cfg;
     if (_.isString(cfg.adapter)) {
-      if(!_.has(EventBusConfiguration.adapters,cfg.adapter)){
-        cfg.adapter = 'default'
-      }
-      this.adapter = EventBusConfiguration.adapters[cfg.adapter];
+      this.adapter = cfg.adapter;
     } else {
       this.adapter = <Function>this.configuration.adapter;
     }
     this._name = cfg.name;
     this.bus = bus;
+
   }
 
 
@@ -38,21 +39,22 @@ export class EventBusConfiguration {
     return this._name;
   }
 
-  static register(adapterClass:Function) {
+  /*
+  static register(adapterClass: Function) {
     let name = adapterClass['ADAPTER_NAME'];
-    if(_.isString(name)){
+    if (_.isString(name)) {
       this.adapters[name] = adapterClass;
-    }else{
-      throw new Error('can\'t register as adapter '+adapterClass);
+    } else {
+      throw new Error('can\'t register as adapter ' + adapterClass);
     }
   }
 
-
-  static createObjectByType<T>(obj: Function, ...args: any[]): T {
-    let _obj: T = Reflect.construct(obj, args);
-    return _obj;
-  }
-
+  /*
+    static createObjectByType<T>(obj: Function, ...args: any[]): T {
+      let _obj: T = Reflect.construct(obj, args);
+      return _obj;
+    }
+  */
 
   createAdapter(nodeId: string, name: string, clazz: Function, opts?: any): IEventBusAdapter {
     let cfg = _.clone(this.configuration);
@@ -70,8 +72,7 @@ export class EventBusConfiguration {
       nodeId = grouped;
     }
 
-    return <IEventBusAdapter>EventBusConfiguration
-      .createObjectByType(this.adapter, nodeId, name, clazz, cfg);
+    return EventBusConfiguration.factory.create(this.adapter, nodeId, name, clazz, cfg);
   }
 
 }

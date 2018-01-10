@@ -11,6 +11,8 @@ export interface IEventBusAdapter {
   readonly options: IEventBusConfiguration;
 
 
+
+
   publish(object: any): Promise<IPseudoObject>;
 
   subscribe(fn: Function): void;

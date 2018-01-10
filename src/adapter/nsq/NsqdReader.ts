@@ -1,8 +1,9 @@
-
 import * as nsqjs from 'nsqjs';
 
-import {INSQSubMessage} from './INSQSubMessage';
 import {EventEmitter} from 'events';
+import {INsqSubMessage} from './INsqSubMessage';
+import {INsqdReader} from './INsqdReader';
+
 
 const MESSAGE = 'message';
 const DISCARD = 'discard';
@@ -12,10 +13,7 @@ const NSQD_CONNECTED = 'nsqd_connected';
 const NSQD_CLOSED = 'nsqd_closed';
 
 
-
-
-
-export class NsqdReader extends EventEmitter {
+export class NsqdReader extends EventEmitter implements INsqdReader {
   options: nsqjs.ReaderConnectionConfigOptions;
 
   reader: nsqjs.Reader;
@@ -88,7 +86,7 @@ export class NsqdReader extends EventEmitter {
       let timestamp_sub = parseInt(message.timestamp.toString().substr((tm_str.length - 6)));
 
 
-      let data: INSQSubMessage = {
+      let data: INsqSubMessage = {
         id: message.id,
         body: message.json(),
         timestamp: timestamp,

@@ -1,13 +1,16 @@
 import * as _ from 'lodash';
-
-import {IEventBusAdapter} from '../IEventBusAdapter';
-import {NsqdReader} from './NsqdReader';
-import {NsqdWriter} from './NsqdWriter';
-import {INSQPubMessage} from './INSQPubMessage';
 import {EventEmitter} from 'events';
-import {INSQSubMessage} from './INSQSubMessage';
+import {IEventBusAdapter} from '../IEventBusAdapter';
+
 import {NsqdObject} from './NsqdObject';
+
 import {IEventBusConfiguration, IPseudoObject} from '../../';
+import {INsqSubMessage} from './INsqSubMessage';
+import {INsqPubMessage} from './INsqPubMessage';
+import {INsqdReader} from './INsqdReader';
+import {INsqdWriter} from './INsqdWriter';
+
+
 
 
 export class NsqdEventBusAdapter implements IEventBusAdapter {
@@ -24,10 +27,15 @@ export class NsqdEventBusAdapter implements IEventBusAdapter {
 
   private emitter: EventEmitter = new EventEmitter();
 
-  private reader: NsqdReader = null;
 
-  private writer: NsqdWriter = null;
 
+  private reader: INsqdReader = null;
+
+  private writer: INsqdWriter = null;
+
+  private static NsqdReader:Function;
+
+  private static NsqdWriter:Function;
 
 
   constructor(nodeId: string, name: string, clazz: Function, options: any) {
@@ -36,17 +44,32 @@ export class NsqdEventBusAdapter implements IEventBusAdapter {
     this.name = name;
     this.clazz = clazz;
     this.emitter.setMaxListeners(1000);
+
+    this.loadDependencies();
+  }
+
+
+  loadDependencies() {
+    try {
+      require('nsqjs');
+      NsqdEventBusAdapter.NsqdReader = require('./NsqdReader').NsqdReader;
+      NsqdEventBusAdapter.NsqdWriter = require('./NsqdWriter').NsqdWriter;
+    } catch (err) {
+      let msg = 'EventBus adapter nsqjs can\'t be loaded, because modul nsqjs is not installed. :(';
+      console.error(msg);
+      throw new Error(msg);
+    }
   }
 
   getEmitter() {
     return this.emitter;
   }
 
-  async getSubscriber(): Promise<NsqdReader> {
+  async getSubscriber(): Promise<INsqdReader> {
     if (this.reader) return this.reader;
-    this.reader = new NsqdReader(this.name, this.nodeId, this.options.extra.reader);
+    this.reader = Reflect.construct(NsqdEventBusAdapter.NsqdReader, [this.name, this.nodeId, this.options.extra.reader]);
     try {
-      this.reader.on('message', this.onMessage.bind(this))
+      this.reader.on('message', this.onMessage.bind(this));
       await this.reader.open();
     } catch (err) {
       throw err;
@@ -55,9 +78,9 @@ export class NsqdEventBusAdapter implements IEventBusAdapter {
   }
 
 
-  async getPublisher(): Promise<NsqdWriter> {
+  async getPublisher(): Promise<INsqdWriter> {
     if (this.writer) return this.writer;
-    this.writer = new NsqdWriter(this.options.extra.writer.host, this.options.extra.writer.port);
+    this.writer = Reflect.construct(NsqdEventBusAdapter.NsqdWriter,[this.options.extra.writer.host, this.options.extra.writer.port]);
     try {
       await this.writer.open();
     } catch (err) {
@@ -67,7 +90,7 @@ export class NsqdEventBusAdapter implements IEventBusAdapter {
   }
 
 
-  onMessage(message: INSQSubMessage) {
+  onMessage(message: INsqSubMessage) {
     let data = message.body;
     if (_.has(data, 'status')) {
       if (data.status === 'work') {
@@ -81,7 +104,7 @@ export class NsqdEventBusAdapter implements IEventBusAdapter {
 
 
   private eventID() {
-    return [this.nodeId, this.name].join('_')
+    return [this.nodeId, this.name].join('_');
   }
 
 
@@ -105,7 +128,7 @@ export class NsqdEventBusAdapter implements IEventBusAdapter {
       try {
         res = await fn(data.object);
       } catch (err2) {
-        err = err2
+        err = err2;
       }
       let writer = await this.getPublisher();
       let _msp = {
@@ -118,16 +141,16 @@ export class NsqdEventBusAdapter implements IEventBusAdapter {
         error: err
       };
 
-      let msg: INSQPubMessage = {
+      let msg: INsqPubMessage = {
         topic: this.name,
         message: JSON.stringify(_msp)
       };
-      await writer.publish(msg)
+      await writer.publish(msg);
     });
   }
 
-  async close(){
-    await Promise.all([this.writer.close(),this.reader.close()])
+  async close() {
+    await Promise.all([this.writer.close(), this.reader.close()]);
   }
 }
 

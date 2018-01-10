@@ -3,9 +3,6 @@ import 'reflect-metadata'
 import {suite, test, timeout} from "mocha-typescript";
 import {expect} from "chai";
 import {EventBus} from '../../src/bus/EventBus';
-import {NsqdEventBusAdapter} from '../../src/adapter/nsq/NsqdEventBusAdapter';
-import {INsqdReaderOptions} from '../../src/adapter/nsq/INsqdReaderOptions';
-import {INsqdWriterOptions} from '../../src/adapter/nsq/INsqdWriterOptions';
 import subscribe from '../../src/decorator/subscribe';
 
 describe('', () => {
@@ -18,14 +15,14 @@ class NsqEventbusSpec {
   static async before() {
     await EventBus.$().addConfiguration({
       name: 'default',
-      adapter: NsqdEventBusAdapter,
+      adapter: 'nsq',
 
       extra: {
-        reader: <INsqdReaderOptions>{
+        reader: {
           nsqdTCPAddresses: ['localhost:4150'],
           maxInFlight: 10
         },
-        writer: <INsqdWriterOptions>{
+        writer: {
           host: '127.0.0.1',
           port: 4150
         }

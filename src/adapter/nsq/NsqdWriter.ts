@@ -1,10 +1,12 @@
 import * as nsqjs from 'nsqjs';
-import {INSQPubMessage} from './INSQPubMessage';
-import {EventEmitter} from 'events';
 import {ConnectionConfigOptions} from 'nsqjs';
 
+import {EventEmitter} from 'events';
+import {INsqdWriter} from './INsqdWriter';
+import {INsqPubMessage} from './INsqPubMessage';
 
-export class NsqdWriter extends EventEmitter {
+
+export class NsqdWriter extends EventEmitter implements INsqdWriter {
 
   writer: nsqjs.Writer;
 
@@ -57,7 +59,7 @@ export class NsqdWriter extends EventEmitter {
     });
   }
 
-  publish(message: INSQPubMessage): Promise<any> {
+  publish(message: INsqPubMessage): Promise<any> {
     return new Promise((resolve, reject) => {
       this.writer.publish(message.topic, message.message, (err: Error) => {
         if (err) {

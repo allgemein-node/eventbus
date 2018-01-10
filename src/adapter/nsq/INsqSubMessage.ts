@@ -1,4 +1,4 @@
-export interface INSQSubMessage {
+export interface INsqSubMessage {
   id: string,
   body: any,
   timestamp: number,

@@ -4,28 +4,19 @@ import {EventChannel} from './EventChannel';
 import {EventBusConfiguration} from './EventBusConfiguration';
 import {IEventBusConfiguration} from './IEventBusConfiguration';
 import {CryptUtils} from '../utils/CryptUtils';
-import {DefaultEventBusAdapter} from '../adapter/default/DefaultEventBusAdapter';
 
 
 const DEFAULT_OPTIONS: IEventBusConfiguration = {
   name: 'default',
-  adapter: DefaultEventBusAdapter,
+  adapter: 'default',
   extra: {
     maxListener: 1000
   }
 };
 
 
-EventBusConfiguration.register(DefaultEventBusAdapter);
+// EventBusConfiguration.register(DefaultEventBusAdapter);
 
-
-try {
-  require('nsqjs');
-  const NsqdEventBusAdapter = require('../adapter/nsq/NsqdEventBusAdapter');
-  EventBusConfiguration.register(NsqdEventBusAdapter);
-} catch (err) {
-  console.warn('EventBus adapter nsqjs can\'t be loaded, because modul nsqjs is not installed.');
-}
 
 
 export class EventBus {
@@ -45,6 +36,7 @@ export class EventBus {
     this.nodeId = CryptUtils.shorthash(Date.now() + CryptUtils.random(8));
     this.addConfiguration(DEFAULT_OPTIONS);
   }
+
 
 
   addConfiguration(cfg: IEventBusConfiguration): EventBusConfiguration {
