@@ -1,6 +1,7 @@
 
 export * from  "./decorator/subscribe";
 export * from  "./adapter/default/DefaultEventBusAdapter";
+export * from  "./adapter/nsq/NsqdEventBusAdapter";
 export * from  "./adapter/IEventBusAdapter";
 export * from  "./bus/IPseudoObject";
 export * from  "./bus/EventBusConfiguration";
