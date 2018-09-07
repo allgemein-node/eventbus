@@ -156,7 +156,7 @@ class Eventbus_redisSpec {
   }
 
 
-  @test.only
+  @test
   async 'fire event'() {
 
     class ActionEvent5 {
