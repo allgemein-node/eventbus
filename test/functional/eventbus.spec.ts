@@ -131,4 +131,9 @@ class EventbusSpec {
 
   }
 
+  static async after() {
+    await EventBus.$().shutdown();
+  }
+
+
 }

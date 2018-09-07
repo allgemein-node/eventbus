@@ -6,8 +6,6 @@ import subscribe from '../../src/decorator/subscribe';
 import {RedisReader} from '../../src/adapter/redis/RedisReader';
 import {RedisWriter} from '../../src/adapter/redis/RedisWriter';
 
-describe('', () => {
-});
 
 
 @suite('functional/eventbus_redis')
@@ -32,6 +30,7 @@ class Eventbus_redisSpec {
   }
 
   static async after() {
+    console.log('SHUTDOWN REDIS')
     await EventBus.$().shutdown();
   }
 
@@ -198,7 +197,6 @@ class Eventbus_redisSpec {
     await Promise.all([reader.open(), writer.open()]);
     reader.on('message', async function (...args: any[]) {
       console.log('message', args);
-      await Promise.all([reader.close(), writer.close()]);
     });
     await writer.publish({
       topic: 'channel',
@@ -209,6 +207,8 @@ class Eventbus_redisSpec {
     });
 
 
+    await new Promise(resolve => setTimeout(resolve,1000));
+    await Promise.all([reader.close(), writer.close()]);
     //await Promise.all([reader.close(),writer.close()]);
 
   }

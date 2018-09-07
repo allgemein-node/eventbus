@@ -148,7 +148,7 @@ export class EventBus {
   }
 
   async shutdown() {
-    await Promise.all(_.map(this.channels,c => c.close()));
+    await Promise.all(_.map(_.values(this.channels),c => c.close()));
     EventBus.self = null;
   }
 

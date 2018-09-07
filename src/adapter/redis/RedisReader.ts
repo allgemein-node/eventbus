@@ -41,6 +41,7 @@ export class RedisReader extends EventEmitter implements IReader {
         if (err) {
           reject(err);
         } else {
+          console.log('close reader '+this.topic);
           resolve();
         }
       });

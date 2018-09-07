@@ -23,6 +23,7 @@ export class RedisWriter extends EventEmitter implements IReader {
         if (err) {
           reject(err);
         } else {
+          console.log('close writer');
           resolve();
         }
       });
