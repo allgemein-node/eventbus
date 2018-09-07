@@ -1,4 +1,6 @@
-export interface INsqSubMessage {
+import {IMessage} from '../IMessage';
+
+export interface INsqSubMessage extends IMessage{
   id: string,
   body: any,
   timestamp: number,

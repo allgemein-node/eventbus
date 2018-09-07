@@ -15,7 +15,7 @@ export class EventBusConfiguration {
 
   private readonly _name: string;
 
-  private static factory: EventBusAdapterFactory = new EventBusAdapterFactory();
+  private static factory: EventBusAdapterFactory = EventBusAdapterFactory.$();
 
   private adapter: string | Function;
 

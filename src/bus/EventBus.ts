@@ -78,6 +78,8 @@ export class EventBus {
   }
 
 
+
+
   static async register(o: any) {
     // support multiple subsriber in one class
     let infos = EventBusMeta.$().getSubscriberInfo(o);
@@ -146,10 +148,8 @@ export class EventBus {
   }
 
   async shutdown() {
-    for (let c in this.channels) {
-      let channel = this.channels[c];
-      await channel.close();
-    }
+    await Promise.all(_.map(this.channels,c => c.close()));
+    EventBus.self = null;
   }
 
   static postAndForget(o: any, options?: any): Promise<any> {

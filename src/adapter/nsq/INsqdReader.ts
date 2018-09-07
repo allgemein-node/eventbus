@@ -1,6 +1,5 @@
-import {EventEmitter} from 'events';
-export interface INsqdReader extends EventEmitter{
-  open(): any;
+import {IReader} from '../IReader';
 
-  close(): void;
+export interface INsqdReader extends IReader{
+
 }

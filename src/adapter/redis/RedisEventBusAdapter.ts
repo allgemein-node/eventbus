@@ -1,50 +1,48 @@
-import * as _ from 'lodash';
-import {EventEmitter} from 'events';
-
-import {NsqdObject} from './NsqdObject';
-
-import {IPseudoObject} from '../../';
-import {INsqSubMessage} from './INsqSubMessage';
-import {INsqPubMessage} from './INsqPubMessage';
-import {INsqdReader} from './INsqdReader';
-import {INsqdWriter} from './INsqdWriter';
+import {IPseudoObject} from '../..';
+import {IReader} from '../IReader';
+import {IWriter} from '../IWriter';
+import {IMessage} from '../IMessage';
 import {AbstractEventBusAdapter} from '../AbstractEventBusAdapter';
+import {RedisObject} from './RedisObject';
+import {INsqPubMessage} from '../nsq/INsqPubMessage';
+import * as _ from 'lodash';
 
 
-export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
+export class RedisEventBusAdapter extends AbstractEventBusAdapter {
 
-  static ADAPTER_NAME = 'nsq';
+  static ADAPTER_NAME = 'redis';
 
 
-  private static NsqdReader: Function;
 
-  private static NsqdWriter: Function;
+  private static Reader: Function;
+
+  private static Writer: Function;
 
 
   constructor(nodeId: string, name: string, clazz: Function, options: any) {
     super(nodeId, name, clazz, options);
-
     this.loadDependencies();
   }
 
 
   loadDependencies() {
     try {
-      require('nsqjs');
-      NsqdEventBusAdapter.NsqdReader = require('./NsqdReader').NsqdReader;
-      NsqdEventBusAdapter.NsqdWriter = require('./NsqdWriter').NsqdWriter;
+      require('redis');
+      RedisEventBusAdapter.Reader = require('./RedisReader').RedisReader;
+      RedisEventBusAdapter.Writer = require('./RedisWriter').RedisWriter;
+
     } catch (err) {
-      let msg = 'EventBus adapter nsqjs can\'t be loaded, because modul nsqjs is not installed. :(';
+      let msg = 'EventBus adapter redis can\'t be loaded, because modul redis is not installed. :(';
       console.error(msg);
       throw new Error(msg);
     }
   }
 
 
-  async getSubscriber(): Promise<INsqdReader> {
+  async getSubscriber(): Promise<IReader> {
     if (this.reader) return this.reader;
-    this.reader = Reflect.construct(NsqdEventBusAdapter.NsqdReader,
-      [this.name, this.nodeId, this.options.extra.reader]);
+    this.reader = Reflect.construct(RedisEventBusAdapter.Reader,
+      [this.name, this.nodeId, this.options.extra]);
     try {
       this.reader.on('message', this.onMessage.bind(this));
       await this.reader.open();
@@ -55,10 +53,10 @@ export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
   }
 
 
-  async getPublisher(): Promise<INsqdWriter> {
+  async getPublisher(): Promise<IWriter> {
     if (this.writer) return this.writer;
-    this.writer = Reflect.construct(NsqdEventBusAdapter.NsqdWriter,
-      [this.options.extra.writer.host, this.options.extra.writer.port]);
+    this.writer = Reflect.construct(RedisEventBusAdapter.Writer,
+      [this.options.extra]);
     try {
       await this.writer.open();
     } catch (err) {
@@ -67,14 +65,14 @@ export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
     return this.writer;
   }
 
-
-  onMessage(message: INsqSubMessage) {
+  onMessage(message: IMessage) {
     let data = message.body;
     if (_.has(data, 'status')) {
       if (data.status === 'work') {
         this.getEmitter().emit(this.eventID(), data.uuid, data);
       } else if (data.status === 'done') {
-        this.getEmitter().emit([this.eventID(), data.uuid, 'done'].join('_'), data.error, data.result);
+        this.getEmitter().emit(
+          [this.eventID(), data.uuid, 'done'].join('_'), data.error, data.result);
       }
     } else if (_.has(data, 'source')) {
     }
@@ -82,13 +80,12 @@ export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
 
 
   async publish(object: any): Promise<IPseudoObject> {
-    let obj = new NsqdObject(this, this.eventID(), object);
+    let obj = new RedisObject(this, this.eventID(), object);
     await obj.fire();
     return obj;
   }
 
-
-  async subscribe(fn: Function) {
+  async subscribe(fn: Function): Promise<void> {
     await this.getSubscriber();
     this.getEmitter().on(this.eventID(), async (uuid: string, data: any) => {
       let res = null;
@@ -109,13 +106,13 @@ export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
         error: err
       };
 
-      let msg: INsqPubMessage = {
+      let msg: IMessage = {
         topic: this.name,
         message: JSON.stringify(_msp)
       };
       await writer.publish(msg);
     });
+
   }
 
 }
-

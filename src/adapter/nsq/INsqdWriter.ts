@@ -1,10 +1,7 @@
-import {EventEmitter} from 'events';
 import {INsqPubMessage} from './INsqPubMessage';
+import {IWriter} from '../IWriter';
 
-export interface INsqdWriter extends EventEmitter{
-  open(): any;
-
-  close(): void;
+export interface INsqdWriter extends IWriter{
 
   publish(msg: INsqPubMessage):void;
 

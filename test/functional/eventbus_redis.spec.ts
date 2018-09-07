@@ -1,30 +1,31 @@
-
-import 'reflect-metadata'
-import {suite, test, timeout} from "mocha-typescript";
-import {expect} from "chai";
+import 'reflect-metadata';
+import {suite, test, timeout} from 'mocha-typescript';
+import {expect} from 'chai';
 import {EventBus} from '../../src/bus/EventBus';
 import subscribe from '../../src/decorator/subscribe';
+import {RedisReader} from '../../src/adapter/redis/RedisReader';
+import {RedisWriter} from '../../src/adapter/redis/RedisWriter';
 
 describe('', () => {
 });
 
 
-@suite('functional/eventbus_nsq')
-class NsqEventbusSpec {
+@suite('functional/eventbus_redis')
+class Eventbus_redisSpec {
 
   static async before() {
     await EventBus.$().addConfiguration({
       name: 'default',
-      adapter: 'nsq',
+      adapter: 'redis',
 
       extra: {
         reader: {
-          nsqdTCPAddresses: ['localhost:4150'],
-          maxInFlight: 10
+          host: '127.0.0.1',
+          port: 6379
         },
         writer: {
           host: '127.0.0.1',
-          port: 4150
+          port: 6379
         }
       }
     });
@@ -34,15 +35,13 @@ class NsqEventbusSpec {
     await EventBus.$().shutdown();
   }
 
-
-
   @test
   async 'broadcast event to multiple instances at the same time'() {
 
     // TODO fire m
 
     class ActionEvent7 {
-      some2: string
+      some2: string;
     }
 
     class QueueWorkerTest7 {
@@ -83,7 +82,7 @@ class NsqEventbusSpec {
 
     // TODO fire m
     class ActionEvent8 {
-      some2: string
+      some2: string;
     }
 
     class QueueWorkerTest8 {
@@ -129,7 +128,7 @@ class NsqEventbusSpec {
   @test
   async 'throw error when event wasn\'t picked up'() {
     class ActionEvent6 {
-      some2: string
+      some2: string;
     }
 
     // default ttl is 1000
@@ -156,11 +155,12 @@ class NsqEventbusSpec {
     expect(postResult).to.deep.eq([null]);
   }
 
-  @test
-  async 'fire event over nsq'() {
+
+  @test.only
+  async 'fire event'() {
 
     class ActionEvent5 {
-      some2: string
+      some2: string;
     }
 
     class QueueWorkerTest5 {
@@ -186,4 +186,30 @@ class NsqEventbusSpec {
 
   }
 
+  @test
+  async 'reader writer com'() {
+    let opts = {
+      host: '127.0.0.1',
+      port: 6379
+    };
+    let reader = new RedisReader('topic', 'channel', opts);
+    let writer = new RedisWriter(opts);
+
+    await Promise.all([reader.open(), writer.open()]);
+    reader.on('message', async function (...args: any[]) {
+      console.log('message', args);
+      await Promise.all([reader.close(), writer.close()]);
+    });
+    await writer.publish({
+      topic: 'channel',
+      message: JSON.stringify({
+        test: 'okay',
+        timestamp: (new Date().getTime())
+      })
+    });
+
+
+    //await Promise.all([reader.close(),writer.close()]);
+
+  }
 }

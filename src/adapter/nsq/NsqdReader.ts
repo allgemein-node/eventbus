@@ -93,7 +93,9 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
         timestamp_sub: timestamp_sub,
         receivedOn: message['receivedOn'],
         lastTouched: message['lastTouched'],
-        touchCount: message['touchCount']
+        touchCount: message['touchCount'],
+        topic:null,
+        message:null
       };
 
       this.emit('message', data);
