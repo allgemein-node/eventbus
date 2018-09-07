@@ -1,6 +1,12 @@
 
 # node-commons-eventbus
 
+
+[![Build Status](https://travis-ci.org/thinkbaer/node-commons-eventbus.svg?branch=master)](https://travis-ci.org/thinkbaer/node-commons-eventbus)
+[![codecov](https://codecov.io/gh/thinkbaer/node-commons-eventbus/branch/master/graph/badge.svg)](https://codecov.io/gh/thinkbaer/node-commons-eventbus)
+[![Dependency Status](https://david-dm.org/thinkbaer/node-commons-eventbus.svg)](https://david-dm.org/thinkbaer/node-commons-eventbus)
+
+
 ## Usage
 
 ```typescript
@@ -39,6 +45,7 @@ EventBus.post(suggestion);
 
 * default (Eventemitter)
 * nsq
+* redis
 
 ## Configuration
 
@@ -50,7 +57,7 @@ Example configuration for nsq:
 import {EventBus} from 'commons-eventbus'
 
 let eventBusSettings = {
-  name: 'default',
+  name: 'default_nsq',
   adapter: 'nsq',
   extra: {
     reader: {
@@ -62,6 +69,24 @@ let eventBusSettings = {
       host: '127.0.0.1',
       port: 4150
     }
+  }
+}
+
+EventBus.$().addConfiguration(eventBusSettings);
+
+```
+
+Example configuration for redis:
+
+```typescript
+import {EventBus} from 'commons-eventbus'
+
+let eventBusSettings = {
+  name: 'default_redis',
+  adapter: 'redis',
+  extra: {
+    host: '127.0.0.1',
+    port: 6379
   }
 }
 
