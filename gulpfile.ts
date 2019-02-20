@@ -4,7 +4,7 @@
 
 
 import {Gulpclass, Task, SequenceTask, MergedTask} from 'gulpclass';
-import tslint from 'gulp-tslint';
+
 
 const gulp = require('gulp');
 const bump = require('gulp-bump');
@@ -169,8 +169,8 @@ export class Gulpfile {
   @Task()
   tslint() {
     return gulp.src(['./src/**/*.ts', './test/**/*.ts'])
-      .pipe(tslint())
-      .pipe(tslint.report());
+//      .pipe(tslint())
+//      .pipe(tslint.report());
   }
 
 }
