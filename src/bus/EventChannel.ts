@@ -118,7 +118,7 @@ export class EventChannel {
 
 
   async close() {
-    this.subscriber = []
+    this.subscriber = [];
     await this.adapter.close();
   }
 

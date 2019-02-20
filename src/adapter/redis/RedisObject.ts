@@ -34,7 +34,7 @@ export class RedisObject implements IPseudoObject {
   }
 
   async fire() {
-    await this.adapter.getSubscriber();
+    // await this.adapter.getSubscriber();
     let writer = await this.adapter.getPublisher();
 
     let _msp = {
@@ -49,7 +49,6 @@ export class RedisObject implements IPseudoObject {
       topic: this.adapter.name,
       message: JSON.stringify(_msp)
     };
-
     await writer.publish(msg);
   }
 

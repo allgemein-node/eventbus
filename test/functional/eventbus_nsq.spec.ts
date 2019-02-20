@@ -1,18 +1,16 @@
-
-import 'reflect-metadata'
-import {suite, test, timeout} from "mocha-typescript";
-import {expect} from "chai";
+import 'reflect-metadata';
+import {suite, test} from 'mocha-typescript';
+import {expect} from 'chai';
 import {EventBus} from '../../src/bus/EventBus';
 import subscribe from '../../src/decorator/subscribe';
-
-describe('', () => {
-});
+import {ILoggerOptions, Logger} from 'commons-base';
 
 
 @suite('functional/eventbus_nsq')
 class NsqEventbusSpec {
 
   static async before() {
+    Logger.getLogger(<ILoggerOptions>{context:'default',type:'console',level:4,override:true});
     await EventBus.$().addConfiguration({
       name: 'default',
       adapter: 'nsq',
@@ -56,7 +54,6 @@ class NsqEventbusSpec {
 
       @subscribe(ActionEvent7)
       doAction7(action: ActionEvent7) {
-        console.log('action ' + this.inc);
         // doing work
         this.done = true;
         return 'DONE_' + this.inc;
@@ -70,7 +67,6 @@ class NsqEventbusSpec {
     await EventBus.register(instance2);
 
     let postResult = await EventBus.post(new ActionEvent7());
-    console.log(postResult);
     expect(postResult).to.deep.eq([['DONE_0', 'DONE_1']]);
     expect(instance.done).to.be.true;
     expect(instance2.done).to.be.true;
@@ -167,7 +163,6 @@ class NsqEventbusSpec {
       done: boolean = false;
 
       @subscribe(ActionEvent5) doAction4(action: ActionEvent5) {
-        console.log(action);
         // doing work
         this.done = true;
         return 'DONE';
@@ -177,8 +172,7 @@ class NsqEventbusSpec {
     let instance = new QueueWorkerTest5();
     await EventBus.register(instance);
 
-    let postResult = await EventBus.post(new ActionEvent5());
-    console.log(postResult);
+    let postResult = await EventBus.post(new ActionEvent5(),{ttl:5000});
     let result = postResult.shift().shift();
     expect(instance.done).to.be.true;
     expect(result).to.be.eq('DONE');

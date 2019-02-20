@@ -1,5 +1,4 @@
 import * as _ from 'lodash';
-import {EventEmitter} from 'events';
 
 import {NsqdObject} from './NsqdObject';
 
@@ -9,6 +8,7 @@ import {INsqPubMessage} from './INsqPubMessage';
 import {INsqdReader} from './INsqdReader';
 import {INsqdWriter} from './INsqdWriter';
 import {AbstractEventBusAdapter} from '../AbstractEventBusAdapter';
+import {Logger} from 'commons-base';
 
 
 export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
@@ -25,6 +25,7 @@ export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
     super(nodeId, name, clazz, options);
 
     this.loadDependencies();
+    this.getEmitter().on('connect', this.connect.bind(this));
   }
 
 
@@ -35,9 +36,43 @@ export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
       NsqdEventBusAdapter.NsqdWriter = require('./NsqdWriter').NsqdWriter;
     } catch (err) {
       let msg = 'EventBus adapter nsqjs can\'t be loaded, because modul nsqjs is not installed. :(';
-      console.error(msg);
+      Logger.warn(msg);
       throw new Error(msg);
     }
+  }
+
+
+  _connecting: boolean = false;
+  _ready: boolean = false;
+
+  async connect() {
+    if (!this._connecting) {
+      this._connecting = true;
+    } else {
+      return;
+    }
+    let sub = await this.getSubscriber();
+    let pub = await this.getPublisher();
+    try {
+      await Promise.all([sub.open(), pub.open()]);
+    } catch (err) {
+      Logger.error(err.message);
+      throw err;
+    }
+    this.getEmitter().emit('ready');
+    this._ready = true;
+  }
+
+  async open() {
+    if (!this._connecting) {
+      this.getEmitter().emit('connect');
+    }
+    if (this._ready) {
+      return null;
+    }
+    return new Promise((resolve, reject) => {
+      this.getEmitter().once('ready', resolve);
+    });
   }
 
 
@@ -45,12 +80,7 @@ export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
     if (this.reader) return this.reader;
     this.reader = Reflect.construct(NsqdEventBusAdapter.NsqdReader,
       [this.name, this.nodeId, this.options.extra.reader]);
-    try {
-      this.reader.on('message', this.onMessage.bind(this));
-      await this.reader.open();
-    } catch (err) {
-      throw err;
-    }
+    this.reader.on('message', this.onMessage.bind(this));
     return this.reader;
   }
 
@@ -59,11 +89,7 @@ export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
     if (this.writer) return this.writer;
     this.writer = Reflect.construct(NsqdEventBusAdapter.NsqdWriter,
       [this.options.extra.writer.host, this.options.extra.writer.port]);
-    try {
-      await this.writer.open();
-    } catch (err) {
-      throw err;
-    }
+
     return this.writer;
   }
 
@@ -82,6 +108,7 @@ export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
 
 
   async publish(object: any): Promise<IPseudoObject> {
+    await this.open();
     let obj = new NsqdObject(this, this.eventID(), object);
     await obj.fire();
     return obj;
@@ -89,7 +116,7 @@ export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
 
 
   async subscribe(fn: Function) {
-    await this.getSubscriber();
+    await this.open();
     this.getEmitter().on(this.eventID(), async (uuid: string, data: any) => {
       let res = null;
       let err = null;

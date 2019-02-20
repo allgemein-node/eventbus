@@ -1,11 +1,9 @@
-
 import {EventEmitter} from 'events';
 import {IPseudoObject} from '../../bus/IPseudoObject';
 import {CryptUtils} from '../../utils/CryptUtils';
-import Timer = NodeJS.Timer;
 import {NsqdEventBusAdapter} from './NsqdEventBusAdapter';
 import {INsqPubMessage} from './INsqPubMessage';
-
+import Timer = NodeJS.Timer;
 
 
 export class NsqdObject implements IPseudoObject {
@@ -35,7 +33,6 @@ export class NsqdObject implements IPseudoObject {
   }
 
   async fire() {
-    let sub = await this.adapter.getSubscriber();
     let writer = await this.adapter.getPublisher();
 
     let _msp = {
@@ -50,6 +47,7 @@ export class NsqdObject implements IPseudoObject {
       topic: this.adapter.name,
       message: JSON.stringify(_msp)
     };
+
 
     await writer.publish(msg);
   }

@@ -4,6 +4,7 @@ import {ConnectionConfigOptions} from 'nsqjs';
 import {EventEmitter} from 'events';
 import {INsqdWriter} from './INsqdWriter';
 import {INsqPubMessage} from './INsqPubMessage';
+import {ERROR, READY} from './Constants';
 
 
 export class NsqdWriter extends EventEmitter implements INsqdWriter {
@@ -31,9 +32,9 @@ export class NsqdWriter extends EventEmitter implements INsqdWriter {
         let binding = (err: Error) => {
           reject(err);
         };
-        this.writer.once(nsqjs.Writer.ERROR, binding);
-        this.writer.once(nsqjs.Writer.READY, () => {
-          this.writer.removeListener(nsqjs.Writer.ERROR, binding);
+        this.writer.once(ERROR, binding);
+        this.writer.once(READY, () => {
+          this.writer.removeListener(ERROR, binding);
           resolve(this.writer);
         });
         this.writer.connect();
@@ -53,7 +54,6 @@ export class NsqdWriter extends EventEmitter implements INsqdWriter {
         } else {
           resolve();
         }
-
       });
       this.writer.close();
     });

@@ -1,11 +1,11 @@
 import {IReader} from '../IReader';
 import {EventEmitter} from 'events';
-import {ClientOpts, RedisClient} from 'redis';
+import {RedisClient} from 'redis';
 import * as _ from 'lodash';
-import * as nsqjs from 'nsqjs';
-import {INsqSubMessage} from '../nsq/INsqSubMessage';
 import {IMessage} from '../IMessage';
-import {E_MESSAGE, E_SUBSCRIBE} from './RedisConstants';
+import {E_MESSAGE, E_PMESSAGE} from './RedisConstants';
+import {IRedisOptions} from './IRedisOptions';
+import {IRedisMessage} from './IRedisMessage';
 
 
 export class RedisReader extends EventEmitter implements IReader {
@@ -14,18 +14,23 @@ export class RedisReader extends EventEmitter implements IReader {
 
   client: RedisClient;
 
-  options: ClientOpts;
+  options: IRedisOptions;
 
-  topic: string;
+  topic: string = 'any';
+
+  /**
+   * identifies the instance (nodeId)
+   */
 
   channel: string;
 
+  ready: boolean = false;
 
-  constructor(topic: string, chanel: string, options: any) {
+
+  constructor(topic: string, channel: string, options: IRedisOptions) {
     super();
-
+    this.channel = channel;
     this.topic = topic;
-    this.channel = chanel;
     let _options = _.clone(options);
     this.options = options['reader'] ? _.merge(_options, _options['reader']) : _options;
   }
@@ -34,14 +39,14 @@ export class RedisReader extends EventEmitter implements IReader {
   async close(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       try {
-        this.client.unsubscribe();
+        this.client.punsubscribe();
       } catch (e) {
       }
       this.client.quit((err, reply) => {
+        this.ready = false;
         if (err) {
           reject(err);
         } else {
-          console.log('close reader '+this.topic);
           resolve();
         }
       });
@@ -81,37 +86,61 @@ export class RedisReader extends EventEmitter implements IReader {
    Client will emit punsubscribe in response to a PUNSUBSCRIBE command. Listeners are passed the channel name as channel and the new count of subscriptions for this client as count. When count is 0, this client has left subscriber mode and no more subscriber events will be emitted.
    */
   open(): any {
+    if(this.ready){
+      return this.channel;
+    }
     return new Promise((resolve, reject) => {
       this.client = new RedisClient(this.options);
-      this.client.on(E_MESSAGE, this.onMessage.bind(this));
-      this.client.subscribe(this.topic, (err, reply) => {
+      this.client.on("psubscribe",() => {
+        console.log('psubscribe')
+      })
+      this.client.psubscribe(this.topic + '::*', (err, channel) => {
         if (err) {
           reject(err);
         } else {
-          console.log('subscribed on channel: '+this.topic);
-          resolve(reply);
+          this.client.on(E_PMESSAGE, this.onPMessage.bind(this));
+          this.ready = true;
+          resolve(channel);
         }
       });
 
     });
   }
 
+  subscribe(callback: (msg: IRedisMessage) => void) {
+    this.on('message', callback);
+  }
 
-  private onMessage(channel: string, message: string): void {
+
+  private onPMessage(pattern:string, channel:string, message:string | any): void {
     try {
+      message = JSON.parse(message);
+    } catch (e) {
+    }
+
+    try {
+      let [topic,receiver] = channel.split('::');
+      if(receiver != '__any__'){
+        if(this.channel != receiver){
+          // not for me
+          return;
+        }
+      }
+
       this.inc++;
 
       let tm_str = (new Date()).getTime() + '';
       let timestamp = parseInt(tm_str.toString().substr(0, tm_str.length - 3));
       let timestamp_sub = parseInt(tm_str.toString().substr((tm_str.length - 3)));
 
-      let data: IMessage = {
-        body: JSON.parse(message),
-        channel: channel,
+
+      let data: IRedisMessage = {
+        //receiver: this.channel,
+        //sender: message.sender,
         timestamp: timestamp,
         timestamp_sub: timestamp_sub,
-        topic: this.topic,
-        message: null
+        topic: topic,
+        message: message
       };
 
       this.emit('message', data);
@@ -120,6 +149,42 @@ export class RedisReader extends EventEmitter implements IReader {
     }
   }
 
+
+/*
+  private onMessage(topic: string, message: string | any): void {
+    try {
+      message = JSON.parse(message);
+    } catch (e) {
+    }
+
+    try {
+      if (message.receiver && message.receiver != this.channel) {
+        // not for me
+        return;
+      }
+
+      this.inc++;
+
+      let tm_str = (new Date()).getTime() + '';
+      let timestamp = parseInt(tm_str.toString().substr(0, tm_str.length - 3));
+      let timestamp_sub = parseInt(tm_str.toString().substr((tm_str.length - 3)));
+
+
+      let data: IRedisMessage = {
+        receiver: this.channel,
+        sender: message.sender,
+        timestamp: timestamp,
+        timestamp_sub: timestamp_sub,
+        topic: topic,
+        message: message
+      };
+
+      this.emit('message', data);
+    } catch (err) {
+      // TODO Throw error!
+    }
+  }
+*/
 
   private onDiscard(message: IMessage): void {
     this.emit('discard', message);

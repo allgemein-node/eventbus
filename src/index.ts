@@ -1,4 +1,5 @@
 
+export * from './browser';
 export * from  "./decorator/subscribe";
 export * from  "./adapter/default/DefaultEventBusAdapter";
 export * from  "./adapter/nsq/NsqdEventBusAdapter";

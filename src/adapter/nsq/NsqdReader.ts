@@ -3,14 +3,8 @@ import * as nsqjs from 'nsqjs';
 import {EventEmitter} from 'events';
 import {INsqSubMessage} from './INsqSubMessage';
 import {INsqdReader} from './INsqdReader';
-
-
-const MESSAGE = 'message';
-const DISCARD = 'discard';
-const ERROR = 'error';
-const CONNECTION_ERROR = 'connection_error';
-const NSQD_CONNECTED = 'nsqd_connected';
-const NSQD_CLOSED = 'nsqd_closed';
+import {Logger} from 'commons-base';
+import {CONNECTION_ERROR, DISCARD, ERROR, MESSAGE, NSQD_CLOSED, READY} from './Constants';
 
 
 export class NsqdReader extends EventEmitter implements INsqdReader {
@@ -24,10 +18,10 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
 
   channel: string;
 
-  constructor(topic: string, chanel: string, options: nsqjs.ReaderConnectionConfigOptions) {
+  constructor(topic: string, channel: string, options: nsqjs.ReaderConnectionConfigOptions) {
     super();
     this.topic = topic;
-    this.channel = chanel;
+    this.channel = channel;
     this.options = options;
   }
 
@@ -47,7 +41,7 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
         };
         this.reader.once(ERROR, binding);
         this.reader.once(CONNECTION_ERROR, binding);
-        this.reader.once(NSQD_CONNECTED, () => {
+        this.reader.once(READY, () => {
           this.reader.removeListener(nsqjs.Reader.ERROR, binding);
           this.reader.removeListener(CONNECTION_ERROR, binding);
           this.reader.on(MESSAGE, this.onMessage.bind(this));
@@ -80,7 +74,6 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
   private onMessage(message: nsqjs.Message): void {
     try {
       this.inc++;
-
       let tm_str = message.timestamp.toString();
       let timestamp = parseInt(message.timestamp.toString().substr(0, tm_str.length - 6));
       let timestamp_sub = parseInt(message.timestamp.toString().substr((tm_str.length - 6)));
@@ -103,6 +96,7 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
 
       message.finish();
     } catch (err) {
+      Logger.error(err.message);
       // TODO Throw error!
     }
   }
@@ -114,12 +108,7 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
 
 
   onError(err: Error): void {
-    /*
-    TODO handle error
-        if (err) {
-          return Log.error(err.message);
-        }
-        */
+    Logger.error(err.message);
   }
 
 

@@ -29,6 +29,10 @@ class ActionEvent3 {
 class EventbusSpec {
 
 
+  static async after() {
+    await EventBus.$().shutdown();
+  }
+
 
   @test
   async 'simple decorator subscription'() {
@@ -129,10 +133,6 @@ class EventbusSpec {
 
 
 
-  }
-
-  static async after() {
-    await EventBus.$().shutdown();
   }
 
 

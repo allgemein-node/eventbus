@@ -1,11 +1,11 @@
 import {IPseudoObject} from '../..';
-import {IReader} from '../IReader';
-import {IWriter} from '../IWriter';
 import {IMessage} from '../IMessage';
 import {AbstractEventBusAdapter} from '../AbstractEventBusAdapter';
 import {RedisObject} from './RedisObject';
-import {INsqPubMessage} from '../nsq/INsqPubMessage';
 import * as _ from 'lodash';
+import {IRedisReader} from './IRedisReader';
+import {IRedisWriter} from './IRedisWriter';
+import {Logger} from 'commons-base';
 
 
 export class RedisEventBusAdapter extends AbstractEventBusAdapter {
@@ -13,39 +13,73 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
   static ADAPTER_NAME = 'redis';
 
 
-
   private static Reader: Function;
 
   private static Writer: Function;
+
+  reader: IRedisReader;
+
+  writer: IRedisWriter;
 
 
   constructor(nodeId: string, name: string, clazz: Function, options: any) {
     super(nodeId, name, clazz, options);
     this.loadDependencies();
+    this.getEmitter().on('connect', this.connect.bind(this));
   }
 
 
+  _connecting: boolean = false;
+  _ready: boolean = false;
+
+  async connect() {
+    if(!this._connecting){
+      this._connecting = true;
+    }else{
+      return;
+    }
+    let sub = await this.getSubscriber();
+    await sub.open();
+    this.getEmitter().emit('ready');
+    this._ready = true;
+  }
+
+  async open() {
+    if(!this._connecting){
+      this.getEmitter().emit('connect');
+    }
+    if (this._ready) {
+      return null;
+    }
+    return new Promise((resolve, reject) => {
+      this.getEmitter().once('ready', resolve);
+    });
+  }
+
   loadDependencies() {
     try {
-      require('redis');
-      RedisEventBusAdapter.Reader = require('./RedisReader').RedisReader;
-      RedisEventBusAdapter.Writer = require('./RedisWriter').RedisWriter;
-
+      if (!RedisEventBusAdapter.Reader && !RedisEventBusAdapter.Writer) {
+        require('redis');
+        RedisEventBusAdapter.Reader = require('./RedisReader').RedisReader;
+        RedisEventBusAdapter.Writer = require('./RedisWriter').RedisWriter;
+      }
     } catch (err) {
       let msg = 'EventBus adapter redis can\'t be loaded, because modul redis is not installed. :(';
-      console.error(msg);
+      Logger.warn(msg);
       throw new Error(msg);
     }
   }
 
 
-  async getSubscriber(): Promise<IReader> {
-    if (this.reader) return this.reader;
+  async getSubscriber(): Promise<IRedisReader> {
+    if (this.reader) {
+      return this.reader;
+    }
+
     this.reader = Reflect.construct(RedisEventBusAdapter.Reader,
       [this.name, this.nodeId, this.options.extra]);
     try {
-      this.reader.on('message', this.onMessage.bind(this));
-      await this.reader.open();
+      this.reader.subscribe(this.onMessage.bind(this));
     } catch (err) {
       throw err;
     }
@@ -53,8 +87,10 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
   }
 
 
-  async getPublisher(): Promise<IWriter> {
-    if (this.writer) return this.writer;
+  async getPublisher(): Promise<IRedisWriter> {
+    if (this.writer) {
+      return this.writer;
+    }
     this.writer = Reflect.construct(RedisEventBusAdapter.Writer,
       [this.options.extra]);
     try {
@@ -65,8 +101,9 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
     return this.writer;
   }
 
+
   onMessage(message: IMessage) {
-    let data = message.body;
+    let data = message.message;
     if (_.has(data, 'status')) {
       if (data.status === 'work') {
         this.getEmitter().emit(this.eventID(), data.uuid, data);
@@ -79,14 +116,17 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
   }
 
 
+
   async publish(object: any): Promise<IPseudoObject> {
+    await this.open();
     let obj = new RedisObject(this, this.eventID(), object);
     await obj.fire();
     return obj;
   }
 
+
   async subscribe(fn: Function): Promise<void> {
-    await this.getSubscriber();
+    await this.open();
     this.getEmitter().on(this.eventID(), async (uuid: string, data: any) => {
       let res = null;
       let err = null;
@@ -95,7 +135,7 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
       } catch (err2) {
         err = err2;
       }
-      let writer = await this.getPublisher();
+      let writer: IRedisWriter = await this.getPublisher();
       let _msp = {
         source: this.nodeId,
         dest: data.source,
@@ -110,9 +150,8 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
         topic: this.name,
         message: JSON.stringify(_msp)
       };
-      await writer.publish(msg);
+      await writer.publish(msg, data.source);
     });
-
   }
 
 }
