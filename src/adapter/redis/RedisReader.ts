@@ -91,9 +91,6 @@ export class RedisReader extends EventEmitter implements IReader {
     }
     return new Promise((resolve, reject) => {
       this.client = new RedisClient(this.options);
-      this.client.on("psubscribe",() => {
-        console.log('psubscribe')
-      })
       this.client.psubscribe(this.topic + '::*', (err, channel) => {
         if (err) {
           reject(err);
