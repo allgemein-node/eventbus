@@ -6,6 +6,7 @@ import {IEventBusConfiguration} from './IEventBusConfiguration';
 import {CryptUtils} from '../utils/CryptUtils';
 
 
+
 const DEFAULT_OPTIONS: IEventBusConfiguration = {
   name: 'default',
   adapter: 'default',

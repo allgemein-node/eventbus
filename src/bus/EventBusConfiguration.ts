@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
 
-
 import {IEventBusConfiguration} from './IEventBusConfiguration';
 import {IEventBusAdapter} from '../adapter/IEventBusAdapter';
 import {EventBus} from './EventBus';
