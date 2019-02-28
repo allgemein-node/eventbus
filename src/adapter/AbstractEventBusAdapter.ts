@@ -45,14 +45,18 @@ export abstract class AbstractEventBusAdapter implements IEventBusAdapter{
 
 
   async shutdown() {
-
     await this.close();
   }
 
 
   async close() {
     this.getEmitter().removeAllListeners();
-    await Promise.all([this.writer.close(), this.reader.close()]);
+    if(this.reader){
+      await this.reader.close();
+    }
+    if(this.writer){
+      await this.writer.close();
+    }
   }
 
 }
