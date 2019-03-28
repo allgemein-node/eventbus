@@ -1,16 +1,58 @@
+import * as _ from 'lodash';
 import 'reflect-metadata';
-import {suite, test, timeout} from 'mocha-typescript';
+import {suite, test} from 'mocha-typescript';
 import {expect} from 'chai';
 import {EventBus} from '../../src/bus/EventBus';
 import subscribe from '../../src/decorator/subscribe';
-import {RedisReader} from '../../src/adapter/redis/RedisReader';
-import {RedisWriter} from '../../src/adapter/redis/RedisWriter';
-import {IRedisOptions} from '../../src/adapter/redis/IRedisOptions';
-import {IMessage} from '../../src/adapter/IMessage';
-import {IRedisMessage} from '../../src/adapter/redis/IRedisMessage';
+import {TestHelper} from './TestHelper';
+import {SpawnHandle} from './SpawnHandle';
 
 
-@suite('functional/eventbus_redis')
+class TestEvent {
+  id: number;
+
+  constructor(id: number = -1) {
+    this.id = id;
+  }
+}
+
+
+class TestEventHandler {
+  id: number;
+
+  constructor(id: number = 0) {
+    this.id = id;
+  }
+
+
+  collect: any[] = [];
+
+  @subscribe(TestEvent)
+  on(e: TestEvent) {
+    console.log(this.id, e.id);
+    this.collect.push([this.id, e.id]);
+  }
+
+  wait(){
+    let max = 30;
+    let prev = this.collect.length;
+    return new Promise((resolve, reject) => {
+      const i = setInterval(() => {
+        if(0 > max--){
+          clearInterval(i);
+          reject(new Error('wait abort'))
+        }
+        if(this.collect.length != prev){
+
+          clearInterval(i);
+          resolve();
+        }
+      },50);
+    });
+  }
+}
+
+@suite('functional/eventbus_redis_combinations')
 class Eventbus_redisSpec {
 
   static async before() {
@@ -32,258 +74,107 @@ class Eventbus_redisSpec {
 
 
   @test
-  async 'redis reader <-> writer communication'() {
-    let channel = 'nodeId123';
-    let topic = 'topic';
+  async 'check eventbus on/off register'() {
 
-    let opts: IRedisOptions = {
-      host: '127.0.0.1',
-      port: 6379
-    };
+    let h1 = new TestEventHandler();
+    await EventBus.register(h1);
 
-    let reader = new RedisReader(topic, channel, opts);
-    let writer = new RedisWriter(opts);
+    let e = new TestEvent(1);
+    EventBus.postAndForget(e);
+    await h1.wait();
 
-    let messages: IRedisMessage[] = [];
-    await Promise.all([reader.open(), writer.open()]);
-    reader.subscribe((msg: IRedisMessage) => {
-      messages.push(msg);
-    });
+    e = new TestEvent(2);
+    EventBus.postAndForget(e);
+    await h1.wait();
 
-    let msg = {
-      test: 'okay',
-      timestamp: (new Date().getTime())
-    };
+    expect(h1.collect).to.have.length(2);
 
-    // global publish
-    await writer.publish({
-      topic: topic,
-      message: msg
-    });
+    await EventBus.unregister(h1);
 
-    // publish undefined channel
-    await writer.publish({
-      topic: topic,
-      message: msg
-    },'dummy');
+    EventBus.postAndForget(new TestEvent(3));
+    await TestHelper.wait(100);
 
-    // publish defined channel
-    await writer.publish({
-      topic: topic,
-      message: msg
-    },channel);
+    expect(h1.collect).to.have.length(2);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await Promise.all([reader.close(), writer.close()]);
-    expect(messages).to.have.length(2);
-    expect(messages[0].topic).to.be.eq(topic);
-    //expect(messages[0].channel).to.be.eq(channel);
-    expect(messages[0].message).to.be.deep.eq(msg);
+    await EventBus.register(h1);
 
-    //console.log('message', message);
+    EventBus.postAndForget(new TestEvent(4));
+    await h1.wait();
 
-    //await Promise.all([reader.close(),writer.close()]);
+    expect(h1.collect).to.have.length(3);
+
+    await EventBus.unregister(h1);
 
   }
 
-
-
   @test
-  async 'throw error when event wasn\'t picked up'() {
-    class ActionEvent6 {
-      some2: string;
-    }
+  async 'check eventbus spawned reg/unreg'() {
 
-    // default ttl is 1000
-    let err: Error = null;
-    let postResult = null;
-    try {
-      postResult = await EventBus.post(new ActionEvent6());
-    } catch (err2) {
-      err = err2;
-    }
-    expect(err.toString()).to.eq(new Error('ttl 1000 passed').toString());
+    let p = SpawnHandle.do(__dirname + '/nodes/node_redis.ts', '--require', 'ts-node/register').start(true);
+    await p.started;
 
-    // change ttl to 500
-    try {
-      postResult = await EventBus.post(new ActionEvent6(), {ttl: 500});
-    } catch (err2) {
-      err = err2;
-    }
-    expect(err.toString()).to.eq(new Error('ttl 500 passed').toString());
+    let h1 = new TestEventHandler(0);
+    await EventBus.register(h1);
 
-    // if ttl set to 0 we don't throw error and we don't wait
+    p.process.send('fire');
+    await h1.wait();
 
-    postResult = await EventBus.post(new ActionEvent6(), {ttl: 0});
-    expect(postResult).to.deep.eq([null]);
+    expect(h1.collect).to.have.length(1);
+    expect(_.last(h1.collect)).to.deep.eq([0, 0]);
+
+    await EventBus.unregister(h1);
+
+    p.process.send('fire');
+    await TestHelper.wait(100);
+
+    await EventBus.register(h1);
+
+    p.process.send('fire');
+    await h1.wait();
+
+    expect(h1.collect).to.have.length(2);
+    expect(_.last(h1.collect)).to.deep.eq([0, 2]);
+
+    await EventBus.unregister(h1);
+
+    p.shutdown();
+    await p.done;
   }
 
 
   @test
-  async 'fire event'() {
+  async 'check eventbus spawned reg/unreg new'() {
 
-    class ActionEvent5 {
-      some2: string;
-    }
+    let p = SpawnHandle.do(__dirname + '/nodes/node_redis.ts', '--require', 'ts-node/register').start(true);
+    await p.started;
 
-    class QueueWorkerTest5 {
-      done: boolean = false;
+    let h1 = new TestEventHandler(0);
+    await EventBus.register(h1);
 
-      @subscribe(ActionEvent5) doAction4(action: ActionEvent5) {
-        // doing work
-        this.done = true;
-        return 'DONE';
-      }
-    }
+    p.process.send('fire');
+    await h1.wait();
 
+    expect(h1.collect).to.have.length(1);
+    expect(_.last(h1.collect)).to.deep.eq([0, 0]);
 
+    await EventBus.unregister(h1);
 
-    let instance = new QueueWorkerTest5();
-    await EventBus.register(instance);
+    p.process.send('fire');
+    await TestHelper.wait(100);
 
-    let postResult = await EventBus.post(new ActionEvent5(), {ttl: 4000});
-    //console.log(postResult);
-    let result = postResult.shift().shift();
-    expect(instance.done).to.be.true;
-    expect(result).to.be.eq('DONE');
+    let h2 = new TestEventHandler(1);
+    await EventBus.register(h2);
 
+    p.process.send('fire');
+    await h2.wait();
 
+    expect(h2.collect).to.have.length(1);
+    expect(_.last(h2.collect)).to.deep.eq([1, 2]);
+
+    await EventBus.unregister(h2);
+
+    p.shutdown();
+    await p.done;
   }
 
-
-
-  @test
-  async 'broadcast event to multiple instances at the same time'() {
-
-    // TODO fire m
-
-    class ActionEvent7 {
-      some2: string;
-    }
-
-    class QueueWorkerTest7 {
-      done: boolean = false;
-      static $inc: number = 0;
-      inc: number = 0;
-
-      constructor() {
-        this.inc = QueueWorkerTest7.$inc++;
-      }
-
-      @subscribe(ActionEvent7)
-      doAction7(action: ActionEvent7) {
-        // doing work
-        this.done = true;
-        return 'DONE_' + this.inc;
-      }
-    }
-
-    let instance = new QueueWorkerTest7();
-    await EventBus.register(instance);
-
-    let instance2 = new QueueWorkerTest7();
-    await EventBus.register(instance2);
-
-    let postResult = await EventBus.post(new ActionEvent7());
-    //console.log(postResult);
-    expect(postResult).to.deep.eq([['DONE_0', 'DONE_1']]);
-    expect(instance.done).to.be.true;
-    expect(instance2.done).to.be.true;
-
-  }
-
-  @test.skip
-  async 'fire event to grouped process instances'() {
-
-    // TODO fire m
-    class ActionEvent8 {
-      some2: string;
-    }
-
-    class QueueWorkerTest8 {
-      done: boolean = false;
-      static $inc: number = 0;
-      inc: number = 0;
-
-      constructor() {
-        this.inc = QueueWorkerTest8.$inc++;
-      }
-
-      @subscribe(ActionEvent8, 'default', {group: 'doaction8'})
-      doAction8(action: ActionEvent8) {
-        this.done = true;
-        return 'DONE_' + this.inc;
-      }
-    }
-
-    let instance = new QueueWorkerTest8();
-    await EventBus.register(instance);
-
-    let instance2 = new QueueWorkerTest8();
-    await EventBus.register(instance2);
-
-    let postResult = await EventBus.post(new ActionEvent8());
-    expect(instance.done).to.be.true;
-    expect(instance2.done).to.be.false;
-    expect(postResult).to.deep.eq([['DONE_0']]);
-
-    instance.done = false;
-    postResult = await EventBus.post(new ActionEvent8());
-    expect(instance.done).to.be.false;
-    expect(instance2.done).to.be.true;
-    expect(postResult).to.deep.eq([['DONE_1']]);
-
-    postResult = await EventBus.post(new ActionEvent8());
-    expect(instance.done).to.be.true;
-    expect(instance2.done).to.be.true;
-    expect(postResult).to.deep.eq([['DONE_0']]);
-  }
-
-
-  @test.skip
-  async 'fire event to grouped process instances'() {
-
-    // TODO fire m
-    class ActionEvent8 {
-      some2: string;
-    }
-
-    class QueueWorkerTest8 {
-      done: boolean = false;
-      static $inc: number = 0;
-      inc: number = 0;
-
-      constructor() {
-        this.inc = QueueWorkerTest8.$inc++;
-      }
-
-      @subscribe(ActionEvent8, 'default', {group: 'doaction8'})
-      doAction8(action: ActionEvent8) {
-        this.done = true;
-        return 'DONE_' + this.inc;
-      }
-    }
-
-    let instance = new QueueWorkerTest8();
-    await EventBus.register(instance);
-
-    let instance2 = new QueueWorkerTest8();
-    await EventBus.register(instance2);
-
-    let postResult = await EventBus.post(new ActionEvent8());
-    expect(instance.done).to.be.true;
-    expect(instance2.done).to.be.false;
-    expect(postResult).to.deep.eq([['DONE_0']]);
-
-    instance.done = false;
-    postResult = await EventBus.post(new ActionEvent8());
-    expect(instance.done).to.be.false;
-    expect(instance2.done).to.be.true;
-    expect(postResult).to.deep.eq([['DONE_1']]);
-
-    postResult = await EventBus.post(new ActionEvent8());
-    expect(instance.done).to.be.true;
-    expect(instance2.done).to.be.true;
-    expect(postResult).to.deep.eq([['DONE_0']]);
-  }
 }

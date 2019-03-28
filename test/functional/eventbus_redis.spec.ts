@@ -239,4 +239,5 @@ class Eventbus_redisSpec {
     expect(postResult).to.deep.eq([['DONE_0']]);
   }
 
+
 }
