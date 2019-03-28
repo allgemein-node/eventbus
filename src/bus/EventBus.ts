@@ -90,7 +90,7 @@ export class EventBus {
 
     for (let info of infos) {
       let channel = await this.$().getOrCreateChannel(info.namespace, info.configuration, info.configurationOptions);
-      channel.register(o, info.method, this.$().nodeId);
+      await channel.register(o, info.method, this.$().nodeId);
     }
   }
 
