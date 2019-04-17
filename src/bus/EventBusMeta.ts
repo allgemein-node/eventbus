@@ -46,6 +46,7 @@ export default class EventBusMeta {
   }
 
 
+
   public register(options: IEventListenerDef) {
     options.namespace = _.kebabCase(options.eventClass.name).replace(/\-/g, '_');
     this.$types.push(options);
