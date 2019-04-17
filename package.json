@@ -60,7 +60,7 @@
     "typescript-require": "^0.2.10"
   },
   "dependencies": {
-    "commons-base": "latest",
+    "commons-base": "^1.1.2",
     "lodash": "^4.17.11",
     "reflect-metadata": "^0.1.13"
   },
