@@ -6,10 +6,7 @@ import {expect} from "chai";
 import subscribe from '../../src/decorator/subscribe';
 import EventBusMeta from '../../src/bus/EventBusMeta';
 import {EventBus} from '../../src/bus/EventBus';
-
-
-describe('', () => {
-});
+import Event from '../../src/decorator/Event';
 
 
 class ActionEvent1 {
@@ -33,6 +30,24 @@ class EventbusSpec {
     await EventBus.$().shutdown();
   }
 
+  @test
+  async 'simple event decorator'() {
+    class ActionEventDef {}
+    Event()(ActionEventDef);
+
+    let ns = EventBusMeta.toNamespace(ActionEventDef);
+    let clazzDef = EventBusMeta.$().findEvent(ns);
+    expect(clazzDef.clazz).to.be.eq(ActionEventDef);
+
+    ns = EventBusMeta.toNamespace("ActionEventDef");
+    clazzDef = EventBusMeta.$().findEvent(ns);
+    expect(clazzDef.clazz).to.be.eq(ActionEventDef);
+
+    ns = EventBusMeta.toNamespace("action_event_def");
+    clazzDef = EventBusMeta.$().findEvent(ns);
+    expect(clazzDef.clazz).to.be.eq(ActionEventDef);
+
+  }
 
   @test
   async 'simple decorator subscription'() {
