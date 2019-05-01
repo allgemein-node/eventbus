@@ -1,7 +1,7 @@
-import * as _ from 'lodash'
+import * as _ from 'lodash';
 
-import {IEventListenerDef} from "./IEventListenerDef";
-import {ISubscriberInfo} from "./ISubscriberInfo";
+import {IEventListenerDef} from './IEventListenerDef';
+import {ISubscriberInfo} from './ISubscriberInfo';
 
 
 export interface IEventDef {
@@ -20,14 +20,14 @@ export default class EventBusMeta {
 
   static $() {
     if (!this.self) {
-      this.self = new EventBusMeta()
+      this.self = new EventBusMeta();
     }
-    return this.self
+    return this.self;
   }
 
 
   public getClassForNamespace(ns: string): Function {
-    let c = _.find(this.$events, {namespace: ns})
+    let c = _.find(this.$events, {namespace: ns});
     if (c) {
       return c.clazz;
     }
@@ -39,35 +39,49 @@ export default class EventBusMeta {
     let ns: string[] = [];
     for (let $t of this.$events) {
       if (o instanceof $t.clazz) {
-        ns.push($t.namespace)
+        ns.push($t.namespace);
       }
     }
-    return _.uniq(ns)
+    return _.uniq(ns);
+  }
+
+  static toNamespace(clazz: Function | string) {
+    let clazzName: string = null;
+    if (!_.isString(clazz)) {
+      clazzName = clazz.name;
+    } else {
+      clazzName = clazz;
+    }
+    return _.kebabCase(clazzName).replace(/\-/g, '_');
   }
 
 
-
   public register(options: IEventListenerDef) {
-    options.namespace = _.kebabCase(options.eventClass.name).replace(/\-/g, '_');
+    options.namespace = EventBusMeta.toNamespace(options.eventClass);
     this.$types.push(options);
     this.registerEventClass(options.eventClass);
   }
 
 
   public registerEventClass(clazz: any) {
-    let ns = _.kebabCase(clazz.name).replace(/\-/g, '_');
+    let ns = EventBusMeta.toNamespace(clazz);
     let e: IEventDef = {
       namespace: ns,
       clazz: clazz
-    }
+    };
 
-    let exists = _.find(this.$events, {namespace: ns})
+    let exists = _.find(this.$events, {namespace: ns});
     if (!exists) {
-      this.$events.push(e)
+      this.$events.push(e);
     }
     return e;
-
   }
+
+
+  findEvent(name: string) {
+    return _.find(this.$events, e => e.namespace == name || e.clazz.name == name);
+  }
+
 
   public getSubscriberInfo(o: any): ISubscriberInfo[] {
     let list: ISubscriberInfo[] = [];
@@ -79,10 +93,10 @@ export default class EventBusMeta {
           method: $t.methodName,
           configuration: $t.configuration,
           configurationOptions: $t.configurationOptions
-        })
+        });
       }
     }
-    return list
+    return list;
   }
 
 
