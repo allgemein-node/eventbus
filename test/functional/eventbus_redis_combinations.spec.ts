@@ -109,7 +109,7 @@ class Eventbus_redisSpec {
   @test
   async 'check eventbus spawned reg/unreg'() {
 
-    let p = SpawnHandle.do(__dirname + '/nodes/node_redis.ts', '--require', 'ts-node/register').start(false);
+    let p = SpawnHandle.do(__dirname + '/nodes/node_redis.ts', '--require', 'ts-node/register').start(true);
     await p.started;
 
     let h1 = new TestEventHandler(0);
@@ -144,7 +144,7 @@ class Eventbus_redisSpec {
   @test
   async 'check eventbus spawned reg/unreg new'() {
 
-    let p = SpawnHandle.do(__dirname + '/nodes/node_redis.ts', '--require', 'ts-node/register').start(false);
+    let p = SpawnHandle.do(__dirname + '/nodes/node_redis.ts', '--require', 'ts-node/register').start(true);
     await p.started;
 
     let h1 = new TestEventHandler(0);
