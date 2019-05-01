@@ -11,9 +11,10 @@
 
 ```typescript
 import 'reflect-metadata'
-import {EventBus} from 'commons-eventbus'
+import {Event,EventBus,subscribe} from 'commons-eventbus'
 
 // Definition of the exchange object type
+@Event()
 class MySuggestion {
     content:string;
     constructor(content:string){
@@ -40,6 +41,45 @@ EventBus.post(suggestion);
 // That's it
 
 ```
+
+Use without annotations:
+
+```typescript
+import 'reflect-metadata'
+import {Event, subscribe, EventBus, EventBusMeta} from 'commons-eventbus'
+
+// Definition of the exchange object type
+class MySuggestion {
+    content:string;
+    constructor(content:string){
+      this.content = content;
+    }
+}
+
+// subscribe to listening for the explicit object type
+class WillListenOnEvent {
+
+  letstalk(data:MySuggestion){
+    console.log(data.content);
+  }
+}
+
+EventBusMeta.$().register({
+  type: 'subscribe',
+  target: WillListenOnEvent,
+  eventClass: MySuggestion,
+  methodName: 'letstalk',
+  configuration: 'default',
+  configurationOptions: null
+});
+
+let instance = new WillListenOnEvent()
+EventBus.register(instance);
+
+let suggestion = new MySuggestion('blabla');
+EventBus.post(suggestion);
+```
+
 
 ## Supported adapter
 
