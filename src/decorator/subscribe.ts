@@ -4,10 +4,10 @@ import {isFunction} from "lodash";
 import {ISubscribeOptions} from "../bus/ISubscribeOptions";
 
 
-export default function subscribe( options: ISubscribeOptions) : Function;
-export default function subscribe( eventClass:Function,configuration?:string) : Function;
-export default function subscribe( eventClass:Function,configuration:string,configurationOptions?:any) : Function;
-export default function subscribe( eventClass:Function | ISubscribeOptions, configuration:string = 'default', configurationOptions:any = null) : Function{
+export function subscribe( options: ISubscribeOptions) : Function;
+export function subscribe( eventClass:Function,configuration?:string) : Function;
+export function subscribe( eventClass:Function,configuration:string,configurationOptions?:any) : Function;
+export function subscribe( eventClass:Function | ISubscribeOptions, configuration:string = 'default', configurationOptions:any = null) : Function{
   return function(object:Function, methodName:string){
     if(isFunction(eventClass)){
       EventBusMeta.$().register({
