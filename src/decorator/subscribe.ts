@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import EventBusMeta from "../bus/EventBusMeta";
 import {isFunction} from "lodash";
 import {ISubscribeOptions} from "../bus/ISubscribeOptions";
