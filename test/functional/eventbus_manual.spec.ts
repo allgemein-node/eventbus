@@ -1,7 +1,9 @@
 import 'reflect-metadata';
 import {suite, test, timeout} from 'mocha-typescript';
 import {expect} from 'chai';
-import subscribe from '../../src/decorator/subscribe';
+import {Event} from '../../src/decorator/Event';
+import {subscribe} from '../../src/decorator/subscribe';
+
 import EventBusMeta from '../../src/bus/EventBusMeta';
 import {EventBus} from '../../src/bus/EventBus';
 
