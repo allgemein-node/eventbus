@@ -9,7 +9,7 @@ export class EventBusAdapterFactory {
 
   private static $self: EventBusAdapterFactory;
 
-  private busTypes:{[k:string]:Function} = {};
+  private busTypes: {[k: string]: Function} = {};
 
   static $() {
     if (!this.$self) {
@@ -30,10 +30,10 @@ export class EventBusAdapterFactory {
 
   create(type: string | Function, nodeId: string, name: string, clazz: Function, options: IEventBusConfiguration) {
     if (_.isString(type)) {
-      if(_.has(this.busTypes,type)){
+      if (_.has(this.busTypes, type)) {
         const _type = this.busTypes[type];
         return Reflect.construct(_type, [nodeId, name, clazz, options]);
-      }else{
+      } else {
         return new DefaultEventBusAdapter(nodeId, name, clazz, options);
       }
 
