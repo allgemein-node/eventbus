@@ -29,7 +29,7 @@ export class NsqdWriter extends EventEmitter implements INsqdWriter {
     return new Promise((resolve, reject) => {
       try {
         this.writer = new nsqjs.Writer(this.host, this.port, this.options);
-        let binding = (err: Error) => {
+        const binding = (err: Error) => {
           reject(err);
         };
         this.writer.once(ERROR, binding);
@@ -46,7 +46,7 @@ export class NsqdWriter extends EventEmitter implements INsqdWriter {
 
 
   close(): Promise<{}> {
-    let self = this;
+    const self = this;
     return new Promise((resolve, reject) => {
       self.writer.once(nsqjs.Writer.CLOSED, (err: Error) => {
         if (err) {

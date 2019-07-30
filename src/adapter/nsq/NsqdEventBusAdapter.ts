@@ -9,6 +9,7 @@ import {INsqdReader} from './INsqdReader';
 import {INsqdWriter} from './INsqdWriter';
 import {AbstractEventBusAdapter} from '../AbstractEventBusAdapter';
 import {Logger} from 'commons-base';
+import {Serializer} from '../../utils/Serializer';
 
 
 export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
@@ -138,7 +139,7 @@ export class NsqdEventBusAdapter extends AbstractEventBusAdapter {
 
       let msg: INsqPubMessage = {
         topic: this.name,
-        message: JSON.stringify(_msp)
+        message: Serializer.serialize(_msp)
       };
       await writer.publish(msg);
     });

@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import {IMessage} from '../IMessage';
 import {C_ANY, E_PSUBSCRIBE} from './RedisConstants';
 import {IRedisOptions} from './IRedisOptions';
+import {Serializer} from '../../utils/Serializer';
 
 
 export class RedisWriter extends EventEmitter implements IReader {
@@ -15,7 +16,7 @@ export class RedisWriter extends EventEmitter implements IReader {
 
   constructor(options: IRedisOptions) {
     super();
-    let _options = _.clone(options);
+    const _options = _.clone(options);
     this.options = options['writer'] ? _.merge(_options, _options['writer']) : _options;
   }
 
@@ -45,7 +46,7 @@ export class RedisWriter extends EventEmitter implements IReader {
     return new Promise((resolve, reject) => {
 
       if (!_.isString(message.message)) {
-        message.message = JSON.stringify(message.message);
+        message.message = Serializer.serialize(message.message);
       }
 
       this.client.publish(message.topic + '::' + channel, message.message, (err, reply) => {

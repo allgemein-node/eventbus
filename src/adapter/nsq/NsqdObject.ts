@@ -4,6 +4,7 @@ import {CryptUtils} from '../../utils/CryptUtils';
 import {NsqdEventBusAdapter} from './NsqdEventBusAdapter';
 import {INsqPubMessage} from './INsqPubMessage';
 import Timer = NodeJS.Timer;
+import {Serializer} from '../../utils/Serializer';
 
 
 export class NsqdObject implements IPseudoObject {
@@ -28,14 +29,14 @@ export class NsqdObject implements IPseudoObject {
       this.error = err;
       // TODO maybe we need results from multiple nodes? We should collect node number and subscriptions! Currently we need one or none ...
       this.emitter.removeAllListeners(this.id + '_' + this.uuid + '_done');
-    })
+    });
 
   }
 
   async fire() {
-    let writer = await this.adapter.getPublisher();
+    const writer = await this.adapter.getPublisher();
 
-    let _msp = {
+    const _msp = {
       source: this.adapter.nodeId,
       uuid: this.uuid,
       status: 'work',
@@ -43,9 +44,9 @@ export class NsqdObject implements IPseudoObject {
       object: this.object
     };
 
-    let msg: INsqPubMessage = {
+    const msg: INsqPubMessage = {
       topic: this.adapter.name,
-      message: JSON.stringify(_msp)
+      message: Serializer.serialize(_msp)
     };
 
 
@@ -55,7 +56,7 @@ export class NsqdObject implements IPseudoObject {
 
   waitForResult(ttl: number = 10000): Promise<any> {
     return new Promise(async (resolve, reject) => {
-      let timer:Timer = null;
+      let timer: Timer = null;
 
       if (ttl > 0) {
         timer = setTimeout(() => {
@@ -74,12 +75,12 @@ export class NsqdObject implements IPseudoObject {
         this.emitter.once(this.id + '_' + this.uuid + '_done', (err: Error, res: any) => {
           clearTimeout(timer);
           if (err) {
-            reject(err)
+            reject(err);
           } else {
-            resolve(res)
+            resolve(res);
           }
         });
       }
-    })
+    });
   }
 }

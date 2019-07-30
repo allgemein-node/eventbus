@@ -5,6 +5,7 @@ import {CryptUtils} from '../../utils/CryptUtils';
 import Timer = NodeJS.Timer;
 import {RedisEventBusAdapter} from './RedisEventBusAdapter';
 import {IMessage} from '../IMessage';
+import {Serializer} from '../../utils/Serializer';
 
 
 export class RedisObject implements IPseudoObject {
@@ -47,7 +48,7 @@ export class RedisObject implements IPseudoObject {
 
     let msg: IMessage = {
       topic: this.adapter.name,
-      message: JSON.stringify(_msp)
+      message: Serializer.serialize(_msp)
     };
     await writer.publish(msg);
   }

@@ -5,6 +5,7 @@ import {INsqSubMessage} from './INsqSubMessage';
 import {INsqdReader} from './INsqdReader';
 import {Logger} from 'commons-base';
 import {CONNECTION_ERROR, DISCARD, ERROR, MESSAGE, NSQD_CLOSED, READY} from './Constants';
+import {Serializer} from '../../utils/Serializer';
 
 
 export class NsqdReader extends EventEmitter implements INsqdReader {
@@ -12,7 +13,7 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
 
   reader: nsqjs.Reader;
 
-  inc: number = 0;
+  inc = 0;
 
   topic: string;
 
@@ -36,7 +37,7 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
     return new Promise((resolve, reject) => {
       try {
         this.reader = new nsqjs.Reader(this.topic, this.channel, this.options);
-        let binding = (err: Error) => {
+        const binding = (err: Error) => {
           reject(err);
         };
         this.reader.once(ERROR, binding);
@@ -58,7 +59,7 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
 
 
   close(): Promise<{}> {
-    let self = this;
+    const self = this;
     return new Promise((resolve, reject) => {
       self.reader.once(NSQD_CLOSED, () => {
         resolve();
@@ -74,25 +75,25 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
   private onMessage(message: nsqjs.Message): void {
     try {
       this.inc++;
-      let tm_str = message.timestamp.toString();
-      let timestamp = parseInt(message.timestamp.toString().substr(0, tm_str.length - 6));
-      let timestamp_sub = parseInt(message.timestamp.toString().substr((tm_str.length - 6)));
+      const tm_str = message.timestamp.toString();
+      const timestamp = parseInt(message.timestamp.toString().substr(0, tm_str.length - 6), 0);
+      const timestamp_sub = parseInt(message.timestamp.toString().substr((tm_str.length - 6)), 0);
 
 
-      let data: INsqSubMessage = {
+      const data: INsqSubMessage = {
         id: message.id,
-        body: message.json(),
+        body: Serializer.deserialize(message.body),
         timestamp: timestamp,
         timestamp_sub: timestamp_sub,
         receivedOn: message['receivedOn'],
         lastTouched: message['lastTouched'],
         touchCount: message['touchCount'],
-        topic:null,
-        message:null
+        topic: null,
+        message: null
       };
 
       this.emit('message', data);
-      //message.touch();
+      // message.touch();
 
       message.finish();
     } catch (err) {

@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 import {IRedisReader} from './IRedisReader';
 import {IRedisWriter} from './IRedisWriter';
 import {Logger} from 'commons-base';
+import {Serializer} from '../../utils/Serializer';
 
 
 export class RedisEventBusAdapter extends AbstractEventBusAdapter {
@@ -148,7 +149,7 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
 
       let msg: IMessage = {
         topic: this.name,
-        message: JSON.stringify(_msp)
+        message: Serializer.serialize(_msp)
       };
       await writer.publish(msg, data.source);
     });
