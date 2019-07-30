@@ -39,7 +39,7 @@ gulp.task('compile', () => {
  */
 gulp.task('packageCompile', async () => {
   const tsProject = ts.createProject('tsconfig.json', {typescript: require('typescript')});
-  const tsResult = gulp.src(['./src/**/*.ts', './node_modules/@types/**/*.ts'])
+  const tsResult = gulp.src(['./src/**/*.ts'])
     .pipe(sourcemaps.init())
     .pipe(tsProject());
 
