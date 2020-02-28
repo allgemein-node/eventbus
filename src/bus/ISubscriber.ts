@@ -1,8 +1,8 @@
 export interface ISubscriber {
-  nodeId:string
+  nodeId: string;
 
-  object:Function
-  method:string
+  object: Function;
+  method: string;
 
 
 }

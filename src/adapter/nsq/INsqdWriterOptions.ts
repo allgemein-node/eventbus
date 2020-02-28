@@ -1,7 +1,7 @@
-import {ConnectionConfigOptions} from "nsqjs";
+import {ConnectionConfigOptions} from 'nsqjs';
 
 export interface INsqdWriterOptions extends ConnectionConfigOptions {
-  host:string
-  port:number
-  messageExtractor:Function
+  host: string;
+  port: number;
+  messageExtractor: Function;
 }

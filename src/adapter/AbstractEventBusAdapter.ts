@@ -1,11 +1,12 @@
 import {IEventBusAdapter} from './IEventBusAdapter';
-import {IEventBusConfiguration, IPseudoObject} from '..';
 import {IReader} from './IReader';
 import {IWriter} from './IWriter';
 import {EventEmitter} from 'events';
+import {IEventBusConfiguration} from '../bus/IEventBusConfiguration';
+import {IPseudoObject} from '../bus/IPseudoObject';
 
 
-export abstract class AbstractEventBusAdapter implements IEventBusAdapter{
+export abstract class AbstractEventBusAdapter implements IEventBusAdapter {
   readonly clazz: Function;
   readonly name: string;
   readonly nodeId: string;
@@ -51,10 +52,10 @@ export abstract class AbstractEventBusAdapter implements IEventBusAdapter{
 
   async close() {
     this.getEmitter().removeAllListeners();
-    if(this.reader){
+    if (this.reader) {
       await this.reader.close();
     }
-    if(this.writer){
+    if (this.writer) {
       await this.writer.close();
     }
   }

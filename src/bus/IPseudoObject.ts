@@ -1,5 +1,5 @@
 
 export interface IPseudoObject {
 
-  waitForResult(ttl:number):Promise<any>;
+  waitForResult(ttl: number): Promise<any>;
 }

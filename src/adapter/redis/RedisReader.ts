@@ -114,6 +114,7 @@ export class RedisReader extends EventEmitter implements IReader {
     try {
       message = Serializer.deserialize(message);
     } catch (e) {
+      console.log(e);
     }
 
     try {

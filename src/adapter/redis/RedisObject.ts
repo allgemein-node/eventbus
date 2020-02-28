@@ -1,7 +1,7 @@
 
 import {EventEmitter} from 'events';
 import {IPseudoObject} from '../../bus/IPseudoObject';
-import {CryptUtils} from '../../utils/CryptUtils';
+import {CryptUtils} from 'commons-base/libs/utils/CryptUtils';
 import Timer = NodeJS.Timer;
 import {RedisEventBusAdapter} from './RedisEventBusAdapter';
 import {IMessage} from '../IMessage';

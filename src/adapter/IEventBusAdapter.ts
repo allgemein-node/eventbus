@@ -1,4 +1,5 @@
-import {IEventBusConfiguration, IPseudoObject} from '../';
+import {IEventBusConfiguration} from '../bus/IEventBusConfiguration';
+import {IPseudoObject} from '../bus/IPseudoObject';
 
 export interface IEventBusAdapter {
 
@@ -9,9 +10,6 @@ export interface IEventBusAdapter {
   readonly clazz: Function;
 
   readonly options: IEventBusConfiguration;
-
-
-
 
   publish(object: any): Promise<IPseudoObject>;
 

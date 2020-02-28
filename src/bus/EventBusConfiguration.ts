@@ -8,18 +8,6 @@ import {EventBusAdapterFactory} from '../adapter/EventBusAdapterFactory';
 
 export class EventBusConfiguration {
 
-  // private static adapters: { [key: string]: Function } = {};
-
-  private readonly configuration: IEventBusConfiguration;
-
-  private readonly _name: string;
-
-  private static factory: EventBusAdapterFactory = EventBusAdapterFactory.$();
-
-  private adapter: string | Function;
-
-  private bus: EventBus;
-
 
   constructor(bus: EventBus, cfg: IEventBusConfiguration) {
     this.configuration = cfg;
@@ -37,6 +25,18 @@ export class EventBusConfiguration {
   get name() {
     return this._name;
   }
+
+  private static factory: EventBusAdapterFactory = EventBusAdapterFactory.$();
+
+  // private static adapters: { [key: string]: Function } = {};
+
+  private readonly configuration: IEventBusConfiguration;
+
+  private readonly _name: string;
+
+  private adapter: string | Function;
+
+  private bus: EventBus;
 
   /*
   static register(adapterClass: Function) {
@@ -56,7 +56,7 @@ export class EventBusConfiguration {
   */
 
   createAdapter(nodeId: string, name: string, clazz: Function, opts?: any): IEventBusAdapter {
-    let cfg = _.clone(this.configuration);
+    const cfg = _.clone(this.configuration);
     if (opts) {
       if (cfg.extra) {
         cfg.extra = _.merge(cfg.extra, opts);
@@ -65,7 +65,7 @@ export class EventBusConfiguration {
       }
     }
 
-    let grouped = <string>_.get(opts, 'group');
+    const grouped = <string>_.get(opts, 'group');
     if (grouped) {
       // if group all have same nodeId!
       nodeId = grouped;

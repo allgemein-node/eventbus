@@ -1,7 +1,7 @@
 
-import {ReaderConnectionConfigOptions} from "nsqjs";
+import {ReaderConnectionConfigOptions} from 'nsqjs';
 
 export interface INsqdReaderOptions extends ReaderConnectionConfigOptions {
-  topic:string
-  channel:string
+  topic: string;
+  channel: string;
 }

@@ -1,5 +1,5 @@
 export interface IMessage {
-  topic: string
-  message: any
-  [k:string]:any;
+  topic: string;
+  message: any;
+  [k: string]: any;
 }

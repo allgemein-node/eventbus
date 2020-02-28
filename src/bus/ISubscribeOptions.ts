@@ -1,5 +1,5 @@
 export interface ISubscribeOptions {
-  eventClass: Function,
-  configuration: string,
-  configurationOptions?:any
+  eventClass: Function;
+  configuration: string;
+  configurationOptions?: any;
 }

@@ -1,4 +1,3 @@
-import {IPseudoObject} from '../..';
 import {IMessage} from '../IMessage';
 import {AbstractEventBusAdapter} from '../AbstractEventBusAdapter';
 import {RedisObject} from './RedisObject';
@@ -7,6 +6,7 @@ import {IRedisReader} from './IRedisReader';
 import {IRedisWriter} from './IRedisWriter';
 import {Logger} from 'commons-base';
 import {Serializer} from '../../utils/Serializer';
+import {IPseudoObject} from '../../bus/IPseudoObject';
 
 
 export class RedisEventBusAdapter extends AbstractEventBusAdapter {
@@ -34,19 +34,19 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
   _ready: boolean = false;
 
   async connect() {
-    if(!this._connecting){
+    if (!this._connecting) {
       this._connecting = true;
-    }else{
+    } else {
       return;
     }
-    let sub = await this.getSubscriber();
+    const sub = await this.getSubscriber();
     await sub.open();
     this.getEmitter().emit('ready');
     this._ready = true;
   }
 
   async open() {
-    if(!this._connecting){
+    if (!this._connecting) {
       this.getEmitter().emit('connect');
     }
     if (this._ready) {
@@ -65,7 +65,7 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
         RedisEventBusAdapter.Writer = require('./RedisWriter').RedisWriter;
       }
     } catch (err) {
-      let msg = 'EventBus adapter redis can\'t be loaded, because modul redis is not installed. :(';
+      const msg = 'EventBus adapter redis can\'t be loaded, because modul redis is not installed. :(';
       Logger.warn(msg);
       throw new Error(msg);
     }
@@ -104,7 +104,7 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
 
 
   onMessage(message: IMessage) {
-    let data = message.message;
+    const data = message.message;
     if (_.has(data, 'status')) {
       if (data.status === 'work') {
         this.getEmitter().emit(this.eventID(), data.uuid, data);
@@ -120,7 +120,7 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
 
   async publish(object: any): Promise<IPseudoObject> {
     await this.open();
-    let obj = new RedisObject(this, this.eventID(), object);
+    const obj = new RedisObject(this, this.eventID(), object);
     await obj.fire();
     return obj;
   }
@@ -136,8 +136,8 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
       } catch (err2) {
         err = err2;
       }
-      let writer: IRedisWriter = await this.getPublisher();
-      let _msp = {
+      const writer: IRedisWriter = await this.getPublisher();
+      const _msp = {
         source: this.nodeId,
         dest: data.source,
         status: 'done',
@@ -147,7 +147,7 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
         error: err
       };
 
-      let msg: IMessage = {
+      const msg: IMessage = {
         topic: this.name,
         message: Serializer.serialize(_msp)
       };

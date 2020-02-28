@@ -1,6 +1,7 @@
 import {EventEmitter} from 'events';
 import {IPseudoObject} from '../../bus/IPseudoObject';
-import {CryptUtils} from '../../utils/CryptUtils';
+import {CryptUtils} from 'commons-base/libs/utils/CryptUtils';
+
 import {NsqdEventBusAdapter} from './NsqdEventBusAdapter';
 import {INsqPubMessage} from './INsqPubMessage';
 import Timer = NodeJS.Timer;
@@ -47,6 +48,7 @@ export class NsqdObject implements IPseudoObject {
     const msg: INsqPubMessage = {
       topic: this.adapter.name,
       message: Serializer.serialize(_msp)
+      // message: _msp
     };
 
 

@@ -1,8 +1,10 @@
 import {EventEmitter} from 'events';
 import {IPseudoObject} from '../../bus/IPseudoObject';
-import {CryptUtils} from '../../utils/CryptUtils';
+// import {CryptUtils} from '../../utils/CryptUtils';
 import {clearTimeout, setTimeout} from 'timers';
 import Timer = NodeJS.Timer;
+// TODO fix index on commons-base
+import {CryptUtils} from 'commons-base/libs/utils/CryptUtils';
 
 
 export class EmitterObject implements IPseudoObject {
