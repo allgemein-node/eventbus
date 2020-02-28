@@ -12,7 +12,7 @@ import {ILoggerOptions, Logger} from 'commons-base';
 class NsqEventbusSpec {
 
   static async before() {
-    Logger.getLogger(<ILoggerOptions>{context:'default',type:'console',level:4,override:true});
+    Logger.getLogger(<ILoggerOptions>{context: 'default', type: 'console', level: 4, override: true});
     await EventBus.$().addConfiguration({
       name: 'default',
       adapter: 'nsq',
@@ -42,17 +42,17 @@ class NsqEventbusSpec {
     // TODO fire m
 
     class ActionEvent7 {
-      some2: string
+      some2: string;
     }
 
     class QueueWorkerTest7 {
-      done: boolean = false;
-      static $inc: number = 0;
-      inc: number = 0;
 
       constructor() {
         this.inc = QueueWorkerTest7.$inc++;
       }
+      static $inc: number = 0;
+      done: boolean = false;
+      inc: number = 0;
 
       @subscribe(ActionEvent7)
       doAction7(action: ActionEvent7) {
@@ -62,13 +62,13 @@ class NsqEventbusSpec {
       }
     }
 
-    let instance = new QueueWorkerTest7();
+    const instance = new QueueWorkerTest7();
     await EventBus.register(instance);
 
-    let instance2 = new QueueWorkerTest7();
+    const instance2 = new QueueWorkerTest7();
     await EventBus.register(instance2);
 
-    let postResult = await EventBus.post(new ActionEvent7());
+    const postResult = await EventBus.post(new ActionEvent7());
     expect(postResult).to.deep.eq([['DONE_0', 'DONE_1']]);
     expect(instance.done).to.be.true;
     expect(instance2.done).to.be.true;
@@ -81,17 +81,17 @@ class NsqEventbusSpec {
 
     // TODO fire m
     class ActionEvent8 {
-      some2: string
+      some2: string;
     }
 
     class QueueWorkerTest8 {
-      done: boolean = false;
-      static $inc: number = 0;
-      inc: number = 0;
 
       constructor() {
         this.inc = QueueWorkerTest8.$inc++;
       }
+      static $inc: number = 0;
+      done: boolean = false;
+      inc: number = 0;
 
       @subscribe(ActionEvent8, 'default', {group: 'doaction8'})
       doAction8(action: ActionEvent8) {
@@ -100,10 +100,10 @@ class NsqEventbusSpec {
       }
     }
 
-    let instance = new QueueWorkerTest8();
+    const instance = new QueueWorkerTest8();
     await EventBus.register(instance);
 
-    let instance2 = new QueueWorkerTest8();
+    const instance2 = new QueueWorkerTest8();
     await EventBus.register(instance2);
 
     let postResult = await EventBus.post(new ActionEvent8());
@@ -127,7 +127,7 @@ class NsqEventbusSpec {
   @test
   async 'throw error when event wasn\'t picked up'() {
     class ActionEvent6 {
-      some2: string
+      some2: string;
     }
 
     // default ttl is 1000
@@ -158,7 +158,7 @@ class NsqEventbusSpec {
   async 'fire event over nsq'() {
 
     class ActionEvent5 {
-      some2: string
+      some2: string;
     }
 
     class QueueWorkerTest5 {
@@ -171,11 +171,11 @@ class NsqEventbusSpec {
       }
     }
 
-    let instance = new QueueWorkerTest5();
+    const instance = new QueueWorkerTest5();
     await EventBus.register(instance);
 
-    let postResult = await EventBus.post(new ActionEvent5(),{ttl:5000});
-    let result = postResult.shift().shift();
+    const postResult = await EventBus.post(new ActionEvent5(), {ttl: 5000});
+    const result = postResult.shift().shift();
     expect(instance.done).to.be.true;
     expect(result).to.be.eq('DONE');
 

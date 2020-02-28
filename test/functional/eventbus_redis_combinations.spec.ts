@@ -3,11 +3,12 @@ import 'reflect-metadata';
 import {suite, test} from 'mocha-typescript';
 import {expect} from 'chai';
 import {EventBus} from '../../src/bus/EventBus';
-import {Event} from '../../src/decorator/Event';
 import {subscribe} from '../../src/decorator/subscribe';
 
 import {TestHelper} from './TestHelper';
 import {SpawnHandle} from './SpawnHandle';
+
+const LOG_EVENT = TestHelper.logEnable(false);
 
 
 class TestEvent {
@@ -34,27 +35,27 @@ class TestEventHandler {
     this.collect.push([this.id, e.id]);
   }
 
-  wait(){
+  wait() {
     let max = 30;
-    let prev = this.collect.length;
+    const prev = this.collect.length;
     return new Promise((resolve, reject) => {
       const i = setInterval(() => {
-        if(0 > max--){
+        if (0 > max--) {
           clearInterval(i);
-          reject(new Error('wait abort'))
+          reject(new Error('wait abort'));
         }
-        if(this.collect.length != prev){
+        if (this.collect.length !== prev) {
 
           clearInterval(i);
           resolve();
         }
-      },50);
+      }, 50);
     });
   }
 }
 
 @suite('functional/eventbus_redis_combinations')
-class Eventbus_redisSpec {
+class EventbusRedisSpec {
 
   static async before() {
     await EventBus.$().addConfiguration({
@@ -77,7 +78,7 @@ class Eventbus_redisSpec {
   @test
   async 'check eventbus on/off register'() {
 
-    let h1 = new TestEventHandler();
+    const h1 = new TestEventHandler();
     await EventBus.register(h1);
 
     let e = new TestEvent(1);
@@ -111,10 +112,10 @@ class Eventbus_redisSpec {
   @test
   async 'check eventbus spawned reg/unreg'() {
 
-    let p = SpawnHandle.do(__dirname + '/nodes/node_redis.ts', '--require', 'ts-node/register').start(true);
+    const p = SpawnHandle.do(__dirname + '/nodes/node_redis.ts', '--require', 'ts-node/register').start(LOG_EVENT);
     await p.started;
 
-    let h1 = new TestEventHandler(0);
+    const h1 = new TestEventHandler(0);
     await EventBus.register(h1);
 
     p.process.send('fire');
@@ -146,10 +147,10 @@ class Eventbus_redisSpec {
   @test
   async 'check eventbus spawned reg/unreg new'() {
 
-    let p = SpawnHandle.do(__dirname + '/nodes/node_redis.ts', '--require', 'ts-node/register').start(true);
+    const p = SpawnHandle.do(__dirname + '/nodes/node_redis.ts', '--require', 'ts-node/register').start(LOG_EVENT);
     await p.started;
 
-    let h1 = new TestEventHandler(0);
+    const h1 = new TestEventHandler(0);
     await EventBus.register(h1);
 
     p.process.send('fire');
@@ -163,7 +164,7 @@ class Eventbus_redisSpec {
     p.process.send('fire');
     await TestHelper.wait(100);
 
-    let h2 = new TestEventHandler(1);
+    const h2 = new TestEventHandler(1);
     await EventBus.register(h2);
 
     p.process.send('fire');

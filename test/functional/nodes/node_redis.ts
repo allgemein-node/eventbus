@@ -1,4 +1,4 @@
-import {EventBus} from '../../../src';
+import {EventBus} from '../../../src/bus/EventBus';
 
 class TestEvent {
   id: number;
@@ -9,7 +9,7 @@ class TestEvent {
 }
 
 (async function () {
-  const LOG_EVENT = true;//
+  const LOG_EVENT = false; //
   await EventBus.$().addConfiguration({
     name: 'default',
     adapter: 'redis',
@@ -20,12 +20,12 @@ class TestEvent {
     }
   });
 
-  let timeout = 3000;
+  const timeout = 3000;
 
 
   let inc = 0;
   console.log('startup finished');
-  let t = setTimeout(async () => {
+  const t = setTimeout(async () => {
     await EventBus.$().shutdown();
   }, timeout);
 
@@ -38,9 +38,9 @@ class TestEvent {
       clearTimeout(t);
       await EventBus.$().shutdown();
       process.exit(0);
-    } else if (m == 'fire') {
-      let id = inc++;
-      console.log('fire test event '+id);
+    } else if (m === 'fire') {
+      const id = inc++;
+      console.log('fire test event ' + id);
       EventBus.postAndForget(new TestEvent(id));
     }
   });
