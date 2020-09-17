@@ -3,6 +3,7 @@ import {DefaultEventBusAdapter} from './default/DefaultEventBusAdapter';
 import {NsqdEventBusAdapter} from './nsq/NsqdEventBusAdapter';
 import {IEventBusConfiguration} from '../bus/IEventBusConfiguration';
 import {RedisEventBusAdapter} from './redis/RedisEventBusAdapter';
+import {MqttEventBusAdapter} from './mqtt/MqttEventBusAdapter';
 
 
 export class EventBusAdapterFactory {
@@ -21,6 +22,7 @@ export class EventBusAdapterFactory {
   private constructor() {
     this.register(NsqdEventBusAdapter);
     this.register(RedisEventBusAdapter);
+    this.register(MqttEventBusAdapter);
   }
 
   register(clazz: Function) {

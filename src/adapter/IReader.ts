@@ -1,8 +1,11 @@
 import {EventEmitter} from 'events';
-export interface IReader extends EventEmitter{
 
+export interface IReader extends EventEmitter {
 
   open(): any;
 
   close(): void;
+
+  isOpened(): boolean;
+
 }

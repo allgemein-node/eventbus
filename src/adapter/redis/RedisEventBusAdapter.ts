@@ -89,7 +89,7 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
 
 
   async getPublisher(): Promise<IRedisWriter> {
-    if (this.writer) {
+    if (this.writer && this.writer.isOpened()) {
       return this.writer;
     }
     this.writer = Reflect.construct(RedisEventBusAdapter.Writer,

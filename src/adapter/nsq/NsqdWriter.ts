@@ -17,6 +17,8 @@ export class NsqdWriter extends EventEmitter implements INsqdWriter {
 
   port: number;
 
+  ready: boolean = false;
+
   constructor(host: string, port: number, options?: ConnectionConfigOptions) {
     super();
     this.host = host;
@@ -24,6 +26,9 @@ export class NsqdWriter extends EventEmitter implements INsqdWriter {
     this.options = options;
   }
 
+  isOpened(): boolean {
+    return this.ready;
+  }
 
   open(): Promise<nsqjs.Writer> {
     return new Promise((resolve, reject) => {
@@ -38,6 +43,7 @@ export class NsqdWriter extends EventEmitter implements INsqdWriter {
           resolve(this.writer);
         });
         this.writer.connect();
+        this.ready = true;
       } catch (err) {
         reject(err);
       }
@@ -46,6 +52,7 @@ export class NsqdWriter extends EventEmitter implements INsqdWriter {
 
 
   close(): Promise<{}> {
+    this.ready = false;
     const self = this;
     return new Promise((resolve, reject) => {
       self.writer.once(nsqjs.Writer.CLOSED, (err: Error) => {

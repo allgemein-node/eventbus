@@ -9,6 +9,7 @@ import {Serializer} from '../../utils/Serializer';
 
 
 export class NsqdReader extends EventEmitter implements INsqdReader {
+
   options: nsqjs.ReaderConnectionConfigOptions;
 
   reader: nsqjs.Reader;
@@ -18,6 +19,8 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
   topic: string;
 
   channel: string;
+
+  ready: boolean = false;
 
   constructor(topic: string, channel: string, options: nsqjs.ReaderConnectionConfigOptions) {
     super();
@@ -32,6 +35,10 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
     return null;
   }
 
+
+  isOpened(): boolean {
+    return this.ready;
+  }
 
   open(): Promise<nsqjs.Reader> {
     return new Promise((resolve, reject) => {
@@ -59,6 +66,7 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
 
 
   close(): Promise<{}> {
+    this.ready = false;
     const self = this;
     return new Promise((resolve, reject) => {
       self.reader.once(NSQD_CLOSED, () => {

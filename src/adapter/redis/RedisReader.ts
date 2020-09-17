@@ -1,21 +1,14 @@
 import {IReader} from '../IReader';
-import {EventEmitter} from 'events';
-import {RedisClient} from 'redis';
 import * as _ from 'lodash';
-import {IMessage} from '../IMessage';
-import {E_PMESSAGE} from './RedisConstants';
+import {C_ANY, C_SEP, E_PMESSAGE} from './RedisConstants';
 import {IRedisOptions} from './IRedisOptions';
 import {IRedisMessage} from './IRedisMessage';
 import {Serializer} from '../../utils/Serializer';
+import {AbstractRedisConnection} from './AbstractRedisConnection';
 
 
-export class RedisReader extends EventEmitter implements IReader {
+export class RedisReader extends AbstractRedisConnection implements IReader {
 
-  inc = 0;
-
-  client: RedisClient;
-
-  options: IRedisOptions;
 
   topic = 'any';
 
@@ -25,11 +18,11 @@ export class RedisReader extends EventEmitter implements IReader {
 
   channel: string;
 
-  ready = false;
+  redisChannel: string;
 
 
   constructor(topic: string, channel: string, options: IRedisOptions) {
-    super();
+    super(options);
     this.channel = channel;
     this.topic = topic;
     const _options = _.clone(options);
@@ -38,37 +31,43 @@ export class RedisReader extends EventEmitter implements IReader {
 
 
   async close(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+    const client = await this.getClient(false);
+    return new Promise<void>(async (resolve, reject) => {
       try {
-        this.client.punsubscribe();
+        client.punsubscribe();
       } catch (e) {
       }
-      this.client.quit((err, reply) => {
-        this.ready = false;
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
+
+      try {
+        await this.quit();
+        resolve();
+      } catch (e) {
+        reject(e);
+      }
     });
   }
 
   /**
    Subscriber Events
+
    If a client has subscriptions active, it may emit these events:
 
    "message" (channel, message)
-   Client will emit message for every message received that matches an active subscription. Listeners are passed the channel name as channel and the message as message.
+   Client will emit message for every message received that matches an active subscription.
+   Listeners are passed the channel name as channel and the message as message.
 
    "pmessage" (pattern, channel, message)
-   Client will emit pmessage for every message received that matches an active subscription pattern. Listeners are passed the original pattern used with PSUBSCRIBE as pattern, the sending channel name as channel, and the message as message.
+   Client will emit pmessage for every message received that matches an active subscription pattern.
+   Listeners are passed the original pattern used with PSUBSCRIBE as pattern, the sending channel name as channel,
+   and the message as message.
 
    "message_buffer" (channel, message)
-   This is the same as the message event with the exception, that it is always going to emit a buffer. If you listen to the message event at the same time as the message_buffer, it is always going to emit a string.
+   This is the same as the message event with the exception, that it is always going to emit a buffer.
+   If you listen to the message event at the same time as the message_buffer, it is always going to emit a string.
 
    "pmessage_buffer" (pattern, channel, message)
-   This is the same as the pmessage event with the exception, that it is always going to emit a buffer. If you listen to the pmessage event at the same time as the pmessage_buffer, it is always going to emit a string.
+   This is the same as the pmessage event with the exception, that it is always going to emit a buffer.
+   If you listen to the pmessage event at the same time as the pmessage_buffer, it is always going to emit a string.
 
    "subscribe" (channel, count)
    Client will emit subscribe in response to a SUBSCRIBE command.
@@ -81,29 +80,37 @@ export class RedisReader extends EventEmitter implements IReader {
    count of subscriptions for this client as count.
 
    "unsubscribe" (channel, count)
-   Client will emit unsubscribe in response to a UNSUBSCRIBE command. Listeners are passed the channel name as channel and the new count of subscriptions for this client as count. When count is 0, this client has left subscriber mode and no more subscriber events will be emitted.
+   Client will emit unsubscribe in response to a UNSUBSCRIBE command. Listeners are passed the channel name as channel and
+   the new count of subscriptions for this client as count. When count is 0, this client has left subscriber mode and
+   no more subscriber events will be emitted.
 
    "punsubscribe" (pattern, count)
-   Client will emit punsubscribe in response to a PUNSUBSCRIBE command. Listeners are passed the channel name as channel and the new count of subscriptions for this client as count. When count is 0, this client has left subscriber mode and no more subscriber events will be emitted.
+   Client will emit punsubscribe in response to a PUNSUBSCRIBE command. Listeners are passed the channel name as channel and
+   the new count of subscriptions for this client as count. When count is 0, this client has left subscriber mode and
+   no more subscriber events will be emitted.
    */
-  open(): any {
+  async open() {
     if (this.ready) {
       return this.channel;
     }
+
+    const client = await this.getClient();
     return new Promise((resolve, reject) => {
-      this.client = new RedisClient(this.options);
-      this.client.psubscribe(this.topic + '::*', (err, channel) => {
+      client.psubscribe(this.topic + '::*', (err, channel) => {
         if (err) {
+          err.message = err.message + ' (#open / subscribe)';
+          console.error(err);
           reject(err);
         } else {
-          this.client.on(E_PMESSAGE, this.onPMessage.bind(this));
+          client.on(E_PMESSAGE, this.onPMessage.bind(this));
           this.ready = true;
+          this.redisChannel = channel;
           resolve(channel);
         }
       });
-
     });
   }
+
 
   subscribe(callback: (msg: IRedisMessage) => void) {
     this.on('message', callback);
@@ -114,12 +121,12 @@ export class RedisReader extends EventEmitter implements IReader {
     try {
       message = Serializer.deserialize(message);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
 
     try {
-      const [topic, receiver] = channel.split('::');
-      if (receiver !== '__any__') {
+      const [topic, receiver] = channel.split(C_SEP);
+      if (receiver !== C_ANY) {
         if (this.channel !== receiver) {
           // not for me
           return;
@@ -132,10 +139,7 @@ export class RedisReader extends EventEmitter implements IReader {
       const timestamp = parseInt(tm_str.toString().substr(0, tm_str.length - 3), 0);
       const timestamp_sub = parseInt(tm_str.toString().substr((tm_str.length - 3)), 0);
 
-
       const data: IRedisMessage = {
-        // receiver: this.channel,
-        // sender: message.sender,
         timestamp: timestamp,
         timestamp_sub: timestamp_sub,
         topic: topic,
@@ -144,59 +148,8 @@ export class RedisReader extends EventEmitter implements IReader {
 
       this.emit('message', data);
     } catch (err) {
-      // TODO Throw error!
+      console.error(err);
     }
-  }
-
-
-  // /*
-  //   private onMessage(topic: string, message: string | any): void {
-  //     try {
-  //       message = JSON.parse(message);
-  //     } catch (e) {
-  //     }
-  //
-  //     try {
-  //       if (message.receiver && message.receiver !== this.channel) {
-  //         // not for me
-  //         return;
-  //       }
-  //
-  //       this.inc++;
-  //
-  //       let tm_str = (new Date()).getTime() + '';
-  //       let timestamp = parseInt(tm_str.toString().substr(0, tm_str.length - 3));
-  //       let timestamp_sub = parseInt(tm_str.toString().substr((tm_str.length - 3)));
-  //
-  //
-  //       let data: IRedisMessage = {
-  //         receiver: this.channel,
-  //         sender: message.sender,
-  //         timestamp: timestamp,
-  //         timestamp_sub: timestamp_sub,
-  //         topic: topic,
-  //         message: message
-  //       };
-  //
-  //       this.emit('message', data);
-  //     } catch (err) {
-  //       // TODO Throw error!
-  //     }
-  //   }
-  // */
-
-  private onDiscard(message: IMessage): void {
-    this.emit('discard', message);
-  }
-
-
-  onError(err: Error): void {
-    /*
-    TODO handle error
-        if (err) {
-          return Log.error(err.message);
-        }
-        */
   }
 
 
