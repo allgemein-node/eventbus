@@ -4,7 +4,7 @@ import {RedisObject} from './RedisObject';
 import * as _ from 'lodash';
 import {IRedisReader} from './IRedisReader';
 import {IRedisWriter} from './IRedisWriter';
-import {Logger} from 'commons-base';
+import {Logger} from '@allgemein/base';
 import {Serializer} from '../../utils/Serializer';
 import {IPseudoObject} from '../../bus/IPseudoObject';
 

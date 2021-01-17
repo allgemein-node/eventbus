@@ -7,7 +7,7 @@ import {INsqPubMessage} from './INsqPubMessage';
 import {INsqdReader} from './INsqdReader';
 import {INsqdWriter} from './INsqdWriter';
 import {AbstractEventBusAdapter} from '../AbstractEventBusAdapter';
-import {Logger} from 'commons-base';
+import {Logger} from '@allgemein/base';
 import {Serializer} from '../../utils/Serializer';
 import {IPseudoObject} from '../../bus/IPseudoObject';
 

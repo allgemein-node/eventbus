@@ -1,17 +1,17 @@
 
-# node-commons-eventbus
+# @allgemein/eventbus
 
 
-[![Build Status](https://travis-ci.org/thinkbaer/node-commons-eventbus.svg?branch=master)](https://travis-ci.org/thinkbaer/node-commons-eventbus)
-[![codecov](https://codecov.io/gh/thinkbaer/node-commons-eventbus/branch/master/graph/badge.svg)](https://codecov.io/gh/thinkbaer/node-commons-eventbus)
-[![Dependency Status](https://david-dm.org/thinkbaer/node-commons-eventbus.svg)](https://david-dm.org/thinkbaer/node-commons-eventbus)
+[![Build Status](https://travis-ci.org/allgemein-node/eventbus.svg?branch=master)](https://travis-ci.org/allgemein-node/eventbus)
+[![codecov](https://codecov.io/gh/allgemein-node/eventbus/branch/master/graph/badge.svg)](https://codecov.io/gh/allgemein-node/eventbus)
+[![Dependency Status](https://david-dm.org/allgemein-node/eventbus.svg)](https://david-dm.org/allgemein-node/eventbus)
 
 
 ## Usage
 
 ```typescript
 import 'reflect-metadata'
-import {Event,EventBus,subscribe} from 'commons-eventbus'
+import {Event,EventBus,subscribe} from '@allgemein/eventbus'
 
 // Definition of the exchange object type
 @Event()
@@ -46,7 +46,7 @@ Use without annotations:
 
 ```typescript
 import 'reflect-metadata'
-import {Event, subscribe, EventBus, EventBusMeta} from 'commons-eventbus'
+import {Event, subscribe, EventBus, EventBusMeta} from '@allgemein/eventbus'
 
 // Definition of the exchange object type
 class MySuggestion {
@@ -94,7 +94,7 @@ TODO
 Example configuration for nsq:
 
 ```typescript
-import {EventBus} from 'commons-eventbus'
+import {EventBus} from '@allgemein/eventbus'
 
 let eventBusSettings = {
   name: 'default_nsq',
@@ -119,7 +119,7 @@ EventBus.$().addConfiguration(eventBusSettings);
 Example configuration for redis:
 
 ```typescript
-import {EventBus} from 'commons-eventbus'
+import {EventBus} from '@allgemein/eventbus'
 
 let eventBusSettings = {
   name: 'default_redis',

@@ -3,7 +3,7 @@ import * as nsqjs from 'nsqjs';
 import {EventEmitter} from 'events';
 import {INsqSubMessage} from './INsqSubMessage';
 import {INsqdReader} from './INsqdReader';
-import {Logger} from 'commons-base';
+import {Logger} from '@allgemein/base';
 import {CONNECTION_ERROR, DISCARD, ERROR, MESSAGE, NSQD_CLOSED, READY} from './Constants';
 import {Serializer} from '../../utils/Serializer';
 
@@ -70,7 +70,7 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
     const self = this;
     return new Promise((resolve, reject) => {
       self.reader.once(NSQD_CLOSED, () => {
-        resolve();
+        resolve(null);
       });
       self.reader.once(ERROR, (err: Error) => {
         reject(err);

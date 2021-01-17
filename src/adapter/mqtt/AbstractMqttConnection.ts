@@ -48,7 +48,7 @@ export abstract class AbstractMqttConnection extends EventEmitter {
         err.message = err.message + ' (#connect)';
         reject(err);
       };
-      const client = connect(this.options);
+      const client = connect(this.options.url, this.options);
       client.on(E_ERROR, tmp);
       client.on(E_CONNECT, () => {
         client.removeListener(E_ERROR, tmp);

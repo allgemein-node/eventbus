@@ -1,11 +1,10 @@
-
 import {EventEmitter} from 'events';
 import {IPseudoObject} from '../../bus/IPseudoObject';
-import {CryptUtils} from 'commons-base/libs/utils/CryptUtils';
-import Timer = NodeJS.Timer;
+import {CryptUtils} from '@allgemein/base/libs/utils/CryptUtils';
 import {RedisEventBusAdapter} from './RedisEventBusAdapter';
 import {IMessage} from '../IMessage';
 import {Serializer} from '../../utils/Serializer';
+import Timer = NodeJS.Timer;
 
 
 export class RedisObject implements IPseudoObject {
@@ -30,15 +29,15 @@ export class RedisObject implements IPseudoObject {
       this.error = err;
       // TODO maybe we need results from multiple nodes? We should collect node number and subscriptions! Currently we need one or none ...
       this.emitter.removeAllListeners(this.id + '_' + this.uuid + '_done');
-    })
+    });
 
   }
 
   async fire() {
     // await this.adapter.getSubscriber();
-    let writer = await this.adapter.getPublisher();
+    const writer = await this.adapter.getPublisher();
 
-    let _msp = {
+    const _msp = {
       source: this.adapter.nodeId,
       uuid: this.uuid,
       status: 'work',
@@ -46,7 +45,7 @@ export class RedisObject implements IPseudoObject {
       object: this.object
     };
 
-    let msg: IMessage = {
+    const msg: IMessage = {
       topic: this.adapter.name,
       message: Serializer.serialize(_msp)
     };
@@ -56,7 +55,7 @@ export class RedisObject implements IPseudoObject {
 
   waitForResult(ttl: number = 10000): Promise<any> {
     return new Promise(async (resolve, reject) => {
-      let timer:Timer = null;
+      let timer: Timer = null;
 
       if (ttl > 0) {
         timer = setTimeout(() => {
@@ -75,12 +74,12 @@ export class RedisObject implements IPseudoObject {
         this.emitter.once(this.id + '_' + this.uuid + '_done', (err: Error, res: any) => {
           clearTimeout(timer);
           if (err) {
-            reject(err)
+            reject(err);
           } else {
-            resolve(res)
+            resolve(res);
           }
         });
       }
-    })
+    });
   }
 }

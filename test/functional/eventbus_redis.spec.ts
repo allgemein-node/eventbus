@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import {suite, test, timeout} from 'mocha-typescript';
+import {suite, test, timeout} from '@testdeck/mocha';
 import {expect} from 'chai';
 import {EventBus} from '../../src/bus/EventBus';
 import {subscribe} from '../../src/decorator/subscribe';

@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import 'reflect-metadata';
-import {suite, test} from 'mocha-typescript';
+import {suite, test} from '@testdeck/mocha';
 import {expect} from 'chai';
 import {EventBus} from '../../src/bus/EventBus';
 import {subscribe} from '../../src/decorator/subscribe';
@@ -47,7 +47,7 @@ class TestEventHandler {
         if (this.collect.length !== prev) {
 
           clearInterval(i);
-          resolve();
+          resolve(null);
         }
       }, 50);
     });

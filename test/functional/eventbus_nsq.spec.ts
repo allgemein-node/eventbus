@@ -1,11 +1,11 @@
 import 'reflect-metadata';
-import {suite, test} from 'mocha-typescript';
+import {suite, test} from '@testdeck/mocha';
 import {expect} from 'chai';
 import {EventBus} from '../../src/bus/EventBus';
 import {Event} from '../../src/decorator/Event';
 import {subscribe} from '../../src/decorator/subscribe';
 
-import {ILoggerOptions, Logger} from 'commons-base';
+import {ILoggerOptions, Logger} from '@allgemein/base';
 
 
 @suite('functional/eventbus_nsq')

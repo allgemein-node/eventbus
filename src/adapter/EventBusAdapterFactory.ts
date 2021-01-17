@@ -1,16 +1,17 @@
 import * as _ from 'lodash';
 import {DefaultEventBusAdapter} from './default/DefaultEventBusAdapter';
-import {NsqdEventBusAdapter} from './nsq/NsqdEventBusAdapter';
 import {IEventBusConfiguration} from '../bus/IEventBusConfiguration';
-import {RedisEventBusAdapter} from './redis/RedisEventBusAdapter';
-import {MqttEventBusAdapter} from './mqtt/MqttEventBusAdapter';
 
-
+/**
+ *
+ * Initialization
+ *
+ */
 export class EventBusAdapterFactory {
 
   private static $self: EventBusAdapterFactory;
 
-  private busTypes: {[k: string]: Function} = {};
+  private busTypes: { [k: string]: Function } = {};
 
   static $() {
     if (!this.$self) {
@@ -19,14 +20,38 @@ export class EventBusAdapterFactory {
     return this.$self;
   }
 
-  private constructor() {
-    this.register(NsqdEventBusAdapter);
-    this.register(RedisEventBusAdapter);
-    this.register(MqttEventBusAdapter);
+  // private constructor() {
+  //   this.register(NsqdEventBusAdapter);
+  //   this.register(RedisEventBusAdapter);
+  //   this.register(MqttEventBusAdapter);
+  // }
+
+  register(clazz: Function, name?: string) {
+    if (!name) {
+      name = _.get(clazz, 'ADAPTER_NAME', null);
+    }
+
+    if (!name) {
+      throw new Error('no name given for the adapter class');
+    }
+    this.busTypes[name] = clazz;
+
   }
 
-  register(clazz: Function) {
-    this.busTypes[clazz['ADAPTER_NAME']] = clazz;
+  unregister(cls: string | Function) {
+
+    for (const k of _.keys(this.busTypes)) {
+      if (_.isString(cls)) {
+        if (k === cls) {
+          delete this.busTypes[k];
+          break;
+        }
+      } else if (_.isFunction(cls)) {
+        if (this.busTypes[k] === cls) {
+          delete this.busTypes[k];
+        }
+      }
+    }
   }
 
 

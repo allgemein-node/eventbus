@@ -1,9 +1,5 @@
-import {IMessage} from '../IMessage';
 import {AbstractEventBusAdapter} from '../AbstractEventBusAdapter';
-import * as _ from 'lodash';
-import {Logger} from 'commons-base';
-import {Serializer} from '../../utils/Serializer';
-import {IPseudoObject} from '../../bus/IPseudoObject';
+import {Logger} from '@allgemein/base';
 import {IMqttReader} from './IMqttReader';
 import {IMqttWriter} from './IMqttWriter';
 

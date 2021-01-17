@@ -1,6 +1,6 @@
 import {EventEmitter} from 'events';
 import {IPseudoObject} from '../../bus/IPseudoObject';
-import {CryptUtils} from 'commons-base/libs/utils/CryptUtils';
+import {CryptUtils} from '@allgemein/base/libs/utils/CryptUtils';
 
 import {NsqdEventBusAdapter} from './NsqdEventBusAdapter';
 import {INsqPubMessage} from './INsqPubMessage';

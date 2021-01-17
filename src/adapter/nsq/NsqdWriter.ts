@@ -59,7 +59,7 @@ export class NsqdWriter extends EventEmitter implements INsqdWriter {
         if (err) {
           reject(err);
         } else {
-          resolve();
+          resolve(null);
         }
       });
       this.writer.close();
@@ -72,7 +72,7 @@ export class NsqdWriter extends EventEmitter implements INsqdWriter {
         if (err) {
           reject(err);
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });

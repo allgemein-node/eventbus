@@ -1,7 +1,6 @@
 import {EventEmitter} from 'events';
 import {IPseudoObject} from '../../bus/IPseudoObject';
-import {CryptUtils} from 'commons-base/libs/utils/CryptUtils';
-// import {RedisEventBusAdapter} from './RedisEventBusAdapter';
+import {CryptUtils} from '@allgemein/base/libs/utils/CryptUtils';
 import {MqttEventBusAdapter} from './MqttEventBusAdapter';
 
 

@@ -7,7 +7,6 @@ import {EmitterObject} from './EmitterObject';
 const DEFAULT_MAX_LISTENER = 1000;
 
 
-
 export class DefaultEventBusAdapter extends EventEmitter implements IEventBusAdapter {
 
   static ADAPTER_NAME = 'default';

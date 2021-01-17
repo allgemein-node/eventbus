@@ -3,8 +3,8 @@ import EventBusMeta from './EventBusMeta';
 import {EventChannel} from './EventChannel';
 import {EventBusConfiguration} from './EventBusConfiguration';
 import {IEventBusConfiguration} from './IEventBusConfiguration';
-import {CryptUtils} from 'commons-base/libs/utils/CryptUtils';
-
+import {CryptUtils} from '@allgemein/base/browser';
+import {EventBusAdapterFactory} from '../adapter/EventBusAdapterFactory';
 
 
 const DEFAULT_OPTIONS: IEventBusConfiguration = {
@@ -45,8 +45,6 @@ export class EventBus {
     }
     return this.self;
   }
-
-
 
 
   static async register(o: any) {
@@ -122,7 +120,20 @@ export class EventBus {
     return this.post(o, options);
   }
 
+  /**
+   * cls must inherit the AbstractEventBusAdapter class
+   *
+   * @param cls
+   * @param name
+   */
+  static registerAdapter(cls: Function, name?: string) {
+    EventBusAdapterFactory.$().register(cls);
 
+  }
+
+  static unregisterAdapter(name_or_cls: Function | string) {
+    EventBusAdapterFactory.$().unregister(name_or_cls);
+  }
 
   addConfiguration(cfg: IEventBusConfiguration): EventBusConfiguration {
     const cfgImpl = new EventBusConfiguration(this, cfg);

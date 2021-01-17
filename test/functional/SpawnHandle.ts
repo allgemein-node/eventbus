@@ -38,13 +38,13 @@ export class SpawnHandle {
       this.process.stderr.on('data', d => {
         const x = d.toString().trim();
         if (/startup finished/.test(x)) {
-          resolve();
+          resolve(null);
         }
       });
       this.process.stdout.on('data', d => {
         const x = d.toString().trim();
         if (/startup finished/.test(x)) {
-          resolve();
+          resolve(null);
         }
       });
     });

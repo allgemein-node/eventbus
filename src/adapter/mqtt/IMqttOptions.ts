@@ -1,4 +1,6 @@
-export interface IMqttOptions {
+import {IClientOptions} from 'mqtt';
+
+export interface IMqttOptions extends IClientOptions {
 
   url: string;
 

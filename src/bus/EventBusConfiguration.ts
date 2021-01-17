@@ -38,6 +38,11 @@ export class EventBusConfiguration {
 
   private bus: EventBus;
 
+
+  static getAdapterFactory() {
+    return this.factory;
+  }
+
   /*
   static register(adapterClass: Function) {
     let name = adapterClass['ADAPTER_NAME'];

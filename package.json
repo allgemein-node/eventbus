@@ -1,24 +1,24 @@
 {
-  "name": "commons-eventbus",
+  "name": "@allgemein/eventbus",
   "version": "0.13.0",
   "description": "",
   "main": "index.js",
   "browser": "browser.js",
   "scripts": {
-    "test": "nyc mocha --opts test/mocha.all.opts",
+    "test": "nyc mocha test/functional/*.spec.ts",
     "posttest": "nyc report --reporter=json && codecov -f coverage/*.json"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thinkbaer/commons-eventbus.git"
+    "url": "git+https://github.com/allgemein-node/eventbus.git"
   },
   "author": {
     "name": "Robert Kania"
   },
   "bugs": {
-    "url": "git+https://github.com/thinkbaer/commons-eventbus.git"
+    "url": "git+https://github.com/allgemein-node/eventbus.git"
   },
-  "homepage": "https://github.com/thinkbaer/commons-eventbus",
+  "homepage": "https://github.com/allgemein-node/eventbus",
   "keywords": [
     "nsq",
     "nsqd",
@@ -34,39 +34,42 @@
   ],
   "devDependencies": {
     "@allgemein/packaging": "^1.1.0",
-    "@testdeck/mocha": "^0.1.0",
-    "@types/bson": "^4.0.2",
-    "@types/chai": "^4.2.12",
+    "@testdeck/mocha": "^0.1.2",
+    "@types/bson": "^4.0.3",
+    "@types/chai": "^4.2.14",
     "@types/glob": "^7.1.3",
-    "@types/gulp": "^4.0.6",
-    "@types/lodash": "^4.14.161",
-    "@types/mocha": "^7.0.2",
-    "@types/node": "^14.11.1",
+    "@types/gulp": "^4.0.8",
+    "@types/lodash": "^4.14.167",
+    "@types/mocha": "^8.2.0",
+    "@types/node": "^14.14.21",
     "@types/nsqjs": "^0.12.0",
-    "@types/redis": "^2.8.27",
+    "@types/redis": "^2.8.28",
     "chai": "^4.2.0",
-    "codecov": "^3.7.2",
-    "codelyzer": "^6.0.0",
-    "del": "^5.1.0",
+    "codecov": "^3.8.1",
+    "codelyzer": "^6.0.1",
+    "del": "^6.0.0",
     "gulp": "^4.0.2",
     "gulp-bump": "^3.2.0",
     "gulp-clean": "^0.4.0",
     "gulp-replace": "^1.0.0",
     "gulp-shell": "^0.8.0",
-    "gulp-sourcemaps": "^2.6.5",
+    "gulp-sourcemaps": "^3.0.0",
     "gulp-typescript": "^5.0.1",
-    "mocha": "^7.2.0",
-    "mqtt": "^4.2.1",
+    "mocha": "^8.2.1",
+    "mqtt": "^4.2.6",
     "nsqjs": "^0.12.1",
     "nyc": "^15.1.0",
     "redis": "^3.0.2",
-    "ts-node": "^9.0.0",
+    "ts-node": "^9.1.1",
     "tslint": "^6.1.3",
-    "typescript": "3.5.3"
+    "typescript": "4.1.3",
+    "reflect-metadata": "^0.1.13"
   },
   "dependencies": {
-    "bson": "^4.1.0",
-    "commons-base": "^1.2.2",
+    "bson": "^4.2.2",
+    "@allgemein/base": "^1.4.0"
+  },
+  "peerDependencies": {
     "reflect-metadata": "^0.1.13"
   },
   "private": true,
