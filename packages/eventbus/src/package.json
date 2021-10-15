@@ -34,7 +34,7 @@
   ],
   "dependencies": {
     "bson": "^4.5.3",
-    "@allgemein/base": "^1.5.6"
+    "@allgemein/base": "^1.6.2"
   },
   "peerDependencies": {
     "reflect-metadata": "^0.1.13"

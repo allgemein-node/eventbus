@@ -69,7 +69,7 @@
     "typescript": "4.4.3"
   },
   "dependencies": {
-    "@allgemein/eventbus": "file:./packages/eventbus/src",
+    "@allgemein/eventbus": "file:./packages/eventbus/src"
   },
   "peerDependencies": {
     "reflect-metadata": "^0.1.13"
