@@ -65,11 +65,11 @@
     "reflect-metadata": "^0.1.13",
     "ts-node": "^10.2.1",
     "tslint": "^6.1.3",
+    "merge-stream": "^2.0.0",
     "typescript": "4.4.3"
   },
   "dependencies": {
     "@allgemein/eventbus": "file:./packages/eventbus/src",
-    "merge-stream": "^2.0.0"
   },
   "peerDependencies": {
     "reflect-metadata": "^0.1.13"
