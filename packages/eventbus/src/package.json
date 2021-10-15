@@ -1,0 +1,60 @@
+{
+  "name": "@allgemein/eventbus",
+  "version": "0.13.0",
+  "description": "",
+  "main": "index.js",
+  "browser": "browser.js",
+  "scripts": {
+    "test": "nyc mocha test/functional/*.spec.ts",
+    "posttest": "nyc report --reporter=json && codecov -f coverage/*.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/allgemein-node/eventbus.git"
+  },
+  "author": {
+    "name": "Robert Kania"
+  },
+  "bugs": {
+    "url": "git+https://github.com/allgemein-node/eventbus.git"
+  },
+  "homepage": "https://github.com/allgemein-node/eventbus",
+  "keywords": [
+    "nsq",
+    "nsqd",
+    "mqtt",
+    "eventbus",
+    "redis",
+    "pubsub",
+    "publish",
+    "subscribe",
+    "queue",
+    "commons",
+    "allgemein"
+  ],
+  "dependencies": {
+    "bson": "^4.5.3",
+    "@allgemein/base": "^1.5.6"
+  },
+  "peerDependencies": {
+    "reflect-metadata": "^0.1.13"
+  },
+  "private": true,
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "tmp/",
+      "build/"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "sourceMap": true,
+    "instrument": true,
+    "cache": false
+  }
+}
