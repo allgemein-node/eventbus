@@ -13,6 +13,8 @@ export abstract class AbstractPseudoObject<T extends IEventBusAdapter> implement
   error: Error = null;
   result: any = null;
   timer: any = null;
+  resolve: Function;
+  reject: Function;
 
 
   constructor(adapter: T, eventID: string, object: any) {
@@ -20,18 +22,28 @@ export abstract class AbstractPseudoObject<T extends IEventBusAdapter> implement
     this.eventID = eventID;
     this.object = object;
     this.adapter = adapter;
-    this.adapter.getEmitter().once(this.listenerEventName(), (err: Error, res: any) => {
+    this.adapter.getEmitter().once(this.listenerEventName(), this.onDone.bind(this));
+  }
+
+  onDone(err: Error, res: any) {
+    if (this.resolve || this.reject) {
+      if (err) {
+        this.reject(err);
+      } else {
+        this.resolve(res);
+      }
+    } else {
       this.result = res;
       this.error = err;
-      this.reset();
-    });
-
+    }
+    this.reset();
   }
 
 
   waitForResult(ttl: number = 10000): Promise<any> {
-    return new Promise(async (resolve, reject) => {
-
+    return new Promise((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
       if (ttl > 0) {
         this.timer = setTimeout(() => {
           this.reset();
@@ -45,15 +57,9 @@ export abstract class AbstractPseudoObject<T extends IEventBusAdapter> implement
       } else if (this.error) {
         this.reset();
         reject(this.error);
-      } else {
-        this.adapter.getEmitter().once(this.listenerEventName(), (err: Error, res: any) => {
-          this.reset();
-          if (err) {
-            reject(err);
-          } else {
-            resolve(res);
-          }
-        });
+      } else if (ttl === 0) {
+        this.reset();
+        resolve(null);
       }
     });
   }
@@ -67,6 +73,9 @@ export abstract class AbstractPseudoObject<T extends IEventBusAdapter> implement
     this.adapter.getEmitter().removeAllListeners(this.listenerEventName());
     clearTimeout(this.timer);
     this.object = null;
+    this.adapter = null;
+    this.reject = null;
+    this.resolve = null;
   }
 
 }

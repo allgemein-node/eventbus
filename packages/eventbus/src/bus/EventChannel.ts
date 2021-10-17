@@ -41,7 +41,7 @@ export class EventChannel {
   }
 
 
-  private create(o: { object: any, method: string }, obj: any): Promise<any> {
+  private callSubscriber(o: ISubscriber, obj: any): Promise<any> {
     return new Promise(async (resolve, reject) => {
       try {
         const res = await o.object[o.method](obj);
@@ -54,17 +54,18 @@ export class EventChannel {
 
 
   private process(obj: any): Promise<any> {
-    // const self = this;
     const prms: Promise<any>[] = [];
-    const _obj = Reflect.construct(this.adapter.clazz, []);
-    assign(_obj, obj);
+    // TODO check if not already this class by deserialization
+    const targetClazz = Reflect.construct(this.adapter.clazz, []);
+    assign(targetClazz, obj);
     if (this.subscriber.length > 0) {
       if (!this.grouped) {
-        for (const entry of this.subscriber) {
-          prms.push(this.create(entry, _obj));
+        for (const iSubscriber of this.subscriber) {
+          prms.push(this.callSubscriber(iSubscriber, targetClazz));
         }
       } else {
-        prms.push(this.create(this.subscriber[this.next], _obj));
+        // on grouped, rotate registered subscriber
+        prms.push(this.callSubscriber(this.subscriber[this.next], targetClazz));
         this.next++;
         if (this.next >= this.subscriber.length) {
           this.next = 0;
@@ -104,15 +105,10 @@ export class EventChannel {
   }
 
 
-  async post(o: any, opts?: IEventPostOptions): Promise<any> {
+  post(o: any, opts?: IEventPostOptions): Promise<any> {
     const ttl: number = get(opts, K_TTL, 1000);
     try {
-      const pseudoResult = await this.adapter.publish(o);
-      if (ttl) {
-        return pseudoResult.waitForResult(ttl);
-      } else {
-        return null;
-      }
+      return this.adapter.publish(o).then(x => x.waitForResult(ttl));
     } catch (err) {
       if (ttl) {
         throw err;

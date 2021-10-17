@@ -73,4 +73,8 @@ export abstract class AbstractEventBusAdapter extends EventEmitter implements IE
 
   }
 
+
+  cleanup() {
+    // this.
+  }
 }

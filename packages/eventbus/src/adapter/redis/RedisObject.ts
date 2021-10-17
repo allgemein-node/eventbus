@@ -12,7 +12,6 @@ export class RedisObject extends AbstractPseudoObject<RedisEventBusAdapter> {
 
   async fire() {
     // await this.adapter.getSubscriber();
-    const writer = await this.adapter.getPublisher();
 
     const _msp = {
       source: this.adapter.nodeId,
@@ -26,6 +25,7 @@ export class RedisObject extends AbstractPseudoObject<RedisEventBusAdapter> {
       topic: this.adapter.name,
       message: Serializer.serialize(_msp)
     };
+    const writer = await this.adapter.getPublisher();
     await writer.publish(msg);
   }
 
