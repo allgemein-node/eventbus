@@ -70,7 +70,11 @@ export abstract class AbstractPseudoObject<T extends IEventBusAdapter> implement
   }
 
   reset() {
-    this.adapter.getEmitter().removeAllListeners(this.listenerEventName());
+
+    if (this.adapter) {
+      const emitter = this.adapter.getEmitter();
+      emitter.removeAllListeners(this.listenerEventName());
+    }
     clearTimeout(this.timer);
     this.object = null;
     this.adapter = null;
