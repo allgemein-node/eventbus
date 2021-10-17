@@ -16,6 +16,8 @@ import {TestHelper} from './TestHelper';
 import {last, range} from 'lodash';
 import {CryptUtils} from '@allgemein/base';
 
+// import heapdump from 'heapdump';
+
 
 @suite('functional/eventbus_redis') @timeout(60000)
 class EventbusRedisSpec {
@@ -359,7 +361,7 @@ class EventbusRedisSpec {
       some: string;
     }
 
-    const catched: any[] = [];
+    let catched: any[] = [];
 
     class QueueWorkerTest6 {
       done = false;
@@ -391,11 +393,58 @@ class EventbusRedisSpec {
     await EventBus.unregister(instance);
     const eventNames2 = channel.getAdapter().getEmitter().eventNames();
 
+
     expect(i).to.be.eq(200);
     expect(listnerAfter).to.be.eq(0);
     expect(catched).to.have.length(i);
     expect(eventNames2).to.have.length(0);
+    catched = null;
+    // heapdump.writeHeapSnapshot('/tmp/heap.heapsnapshot');
+  }
 
+
+  @test
+  async 'fire events but not catched'() {
+    class UncatchedActionEvent {
+      some: string;
+    }
+
+    // let catched: any[] = [];
+    //
+    // class QueueWorkerTest6 {
+    //   done = false;
+    //
+    //   @subscribe(MultiActionEvent) doAction4(action: MultiActionEvent) {
+    //     // doing work
+    //     catched.push(action);
+    //     this.done = true;
+    //     return 'DONE';
+    //   }
+    // }
+
+    // const instance = new QueueWorkerTest6();
+    // await EventBus.register(instance);
+    let i = 0;
+    for (const x of range(0, 200)) {
+      const c = new UncatchedActionEvent();
+      c.some = 'test-' + CryptUtils.shorthash(new Date().getTime() + '-' + x).repeat(20);
+      EventBus.postAndForget(c);
+      i += 1;
+    }
+
+    const namespaces = EventBus.namespaces;
+    const eventName = last(namespaces);
+
+    await TestHelper.wait(50);
+
+    const channel = EventBus.$().getChannel(eventName);
+    const emitter = channel.getAdapter().getEmitter();
+
+    await TestHelper.waitFor(() => emitter.listenerCount(eventName) === 0);
+    //
+    const listnerAfter = channel.getAdapter().getEmitter().listenerCount(eventName);
+    expect(i).to.be.eq(200);
+    expect(listnerAfter).to.be.eq(0);
   }
 
   @test
