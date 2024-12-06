@@ -9,7 +9,8 @@
     "clean:build": "npx lerna run clean:build",
     "test": "npx lerna run test --concurrency=1",
     "build": "npm run clean:build && npx lerna run build",
-    "packages:publish": "npx lerna publish from-package"
+    "packages:publish": "npx lerna publish from-package",
+    "packages:version": "./scripts/version.sh"
   },
   "workspaces": [
     "packages/*/src"

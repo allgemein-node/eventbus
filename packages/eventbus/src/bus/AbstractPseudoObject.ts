@@ -24,6 +24,7 @@ export abstract class AbstractPseudoObject<T extends IEventBusAdapter> implement
     this.adapter.getEmitter().once(this.listenerEventName(), this.onDone.bind(this));
   }
 
+  
   onDone(err: Error, res: any) {
     if (this.resolve || this.reject) {
       if (err) {
