@@ -3,12 +3,10 @@
   "version": "independent",
   "command": {
     "version": {
-      "ignore": "app|app-auth|testtask",
       "allowBranch": [
         "main",
         "master"
       ],
-      "preid": "dev",
       "noPush": true,
       "gitTagVersion": false,
       "exact": false,
