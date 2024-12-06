@@ -6,15 +6,22 @@ import {clearTimeout, setTimeout} from 'timers';
 export abstract class AbstractPseudoObject<T extends IEventBusAdapter> implements IPseudoObject {
 
   eventID: string;
-  uuid: string;
-  object: any;
-  adapter: T;
-  error: Error = null;
-  result: any = null;
-  timer: any = null;
-  resolve: Function;
-  reject: Function;
 
+  uuid: string;
+
+  object: any;
+
+  adapter: T;
+
+  error: Error = null;
+
+  result: any = null;
+
+  timer: any = null;
+
+  resolve: Function;
+
+  reject: Function;
 
   constructor(adapter: T, eventID: string, object: any) {
     this.uuid = CryptUtils.shorthash(Date.now() + '');
@@ -24,7 +31,7 @@ export abstract class AbstractPseudoObject<T extends IEventBusAdapter> implement
     this.adapter.getEmitter().once(this.listenerEventName(), this.onDone.bind(this));
   }
 
-  
+
   onDone(err: Error, res: any) {
     if (this.resolve || this.reject) {
       if (err) {
