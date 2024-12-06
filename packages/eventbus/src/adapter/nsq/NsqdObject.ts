@@ -57,7 +57,7 @@ export class NsqdObject implements IPseudoObject {
 
   waitForResult(ttl: number = 10000): Promise<any> {
     return new Promise(async (resolve, reject) => {
-      let timer: Timer = null;
+      let timer: NodeJS.Timeout = null;
 
       if (ttl > 0) {
         timer = setTimeout(() => {

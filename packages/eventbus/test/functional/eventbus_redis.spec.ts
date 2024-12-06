@@ -16,8 +16,6 @@ import {TestHelper} from './TestHelper';
 import {last, range} from 'lodash';
 import {CryptUtils} from '@allgemein/base';
 
-// import heapdump from 'heapdump';
-
 
 @suite('functional/eventbus_redis') @timeout(60000)
 class EventbusRedisSpec {
@@ -136,18 +134,29 @@ class EventbusRedisSpec {
     const opts: IRedisOptions = {
       host: '127.0.0.1',
       port: 6381,
-      retry_strategy: function (options) {
-        if (options.error && options.error.code === 'ECONNREFUSED') {
-          return new Error('The server refused the connection');
+      socket: {
+
+        reconnectStrategy: (retry: number, cause: Error) => {
+          // @ts-ignore
+          if (cause && cause['code'] === 'ECONNREFUSED') {
+            return new Error('The server refused the connection');
+          }
+          return false;
         }
-        if (options.total_retry_time > 1000 * 60 * 60) {
-          return new Error('Retry time exhausted');
-        }
-        if (options.attempt > 10) {
-          return undefined;
-        }
-        return Math.min(options.attempt * 100, 3000);
       }
+
+      // retry_strategy: function (options) {
+      //   if (options.error && options.error.code === 'ECONNREFUSED') {
+      //     return new Error('The server refused the connection');
+      //   }
+      //   if (options.total_retry_time > 1000 * 60 * 60) {
+      //     return new Error('Retry time exhausted');
+      //   }
+      //   if (options.attempt > 10) {
+      //     return undefined;
+      //   }
+      //   return Math.min(options.attempt * 100, 3000);
+      // }
     };
 
     const reader = new RedisReader(topic, channel, opts);
@@ -165,7 +174,8 @@ class EventbusRedisSpec {
       error = e;
     }
 
-    expect(error.message).to.be.eq('Redis connection in broken state: retry aborted. (#connect)');
+    // expect(error.message).to.be.eq('Redis connection in broken state: retry aborted. (#connect)');
+    expect(error.message).to.be.eq('connect ECONNREFUSED 127.0.0.1:6381 (#onError RedisReader)');
 
     reader.subscribe((msg: IRedisMessage) => {
       messages.push(msg);
@@ -399,7 +409,6 @@ class EventbusRedisSpec {
     expect(catched).to.have.length(i);
     expect(eventNames2).to.have.length(0);
     catched = null;
-    // heapdump.writeHeapSnapshot('/tmp/heap.heapsnapshot');
   }
 
 

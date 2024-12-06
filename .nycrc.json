@@ -15,7 +15,8 @@
   "reporter": [
     "json"
   ],
-  "report-dir": "../../../coverage/eventbus",
+  "temp-dir": "/tmp/typexs/.nyc-output/moses",
+  "report-dir": "../../../coverage/moses",
   "sourceMap": true,
   "instrument": true,
   "cache": false

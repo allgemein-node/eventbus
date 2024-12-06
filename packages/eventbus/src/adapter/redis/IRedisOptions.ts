@@ -1,6 +1,10 @@
-import {ClientOpts} from 'redis';
+import {RedisClientOptions} from 'redis';
 
-export interface IRedisOptions extends ClientOpts {
+export interface IRedisOptions extends RedisClientOptions {
+
+  host: string;
+
+  port: number;
 
   unref?: boolean;
 

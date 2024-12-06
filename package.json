@@ -1,15 +1,19 @@
 {
-  "name": "@allgemein/eventbus-dev",
+  "name": "@allgemein/eventbus-root",
   "version": "0.14.2",
-  "description": "",
   "main": "index.js",
   "browser": "browser.js",
   "scripts": {
-    "test": "npx gulp test",
-    "posttest": "npx codecov -f coverage/**/*.json",
-    "lint": "npx ng lint",
-    "mocha": "npx mocha test/{**,**/**}/*.spec.ts"
+    "clean": "npx lerna clean -y && npx lerna run clean && rm node_modules -R",
+    "clean:modules": "npx lerna run clean:modules && rm node_modules -R",
+    "clean:build": "npx lerna run clean:build",
+    "test": "npx lerna run test --concurrency=1",
+    "build": "npm run clean:build && npx lerna run build",
+    "packages:publish": "npx lerna publish from-package"
   },
+  "workspaces": [
+    "packages/*/src"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/allgemein-node/eventbus.git"
@@ -35,63 +39,23 @@
     "allgemein"
   ],
   "devDependencies": {
-    "@allgemein/packaging": "^1.2.13",
-    "@testdeck/mocha": "^0.1.2",
-    "@types/bson": "^4.0.5",
-    "@types/chai": "^4.2.22",
-    "@types/glob": "^7.1.4",
-    "@types/gulp": "^4.0.9",
-    "@types/heapdump": "^0.3.1",
-    "@types/lodash": "^4.14.175",
-    "@types/mocha": "^9.0.0",
-    "@types/node": "^16.10.3",
-    "@types/nsqjs": "^0.12.1",
-    "@types/redis": "^2.8.32",
-    "chai": "^4.3.4",
-    "codecov": "^3.8.3",
-    "codelyzer": "^6.0.2",
-    "del": "^6.0.0",
-    "gulp": "^4.0.2",
-    "gulp-bump": "^3.2.0",
-    "gulp-clean": "^0.4.0",
-    "gulp-replace": "^1.1.3",
-    "gulp-shell": "^0.8.0",
-    "gulp-sourcemaps": "^3.0.0",
-    "gulp-typescript": "^5.0.1",
-    "heapdump": "^0.3.15",
-    "merge-stream": "^2.0.0",
-    "mocha": "^9.1.2",
-    "mqtt": "^4.2.8",
+    "@testdeck/mocha": "^0.3.3",
+    "@types/chai": "^5.0.1",
+    "@types/lodash": "^4.17.13",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.10.1",
+    "@types/nsqjs": "^0.12.4",
+    "@types/redis": "^4.0.11",
+    "chai": "^5.1.2",
+    "del": "^8.0.0",
+    "lerna": "^8.1.9",
+    "mocha": "^11.0.1",
+    "mqtt": "^5.10.3",
     "nsqjs": "^0.13.0",
-    "nyc": "^15.1.0",
-    "redis": "^3.1.2",
-    "reflect-metadata": "^0.1.13",
-    "ts-node": "^10.2.1",
+    "nyc": "^17.1.0",
+    "redis": "^4.7.0",
+    "ts-node": "^10.9.2",
     "tslint": "^6.1.3",
-    "typescript": "4.4.3"
-  },
-  "dependencies": {
-    "@allgemein/eventbus": "file:./packages/eventbus/src"
-  },
-  "peerDependencies": {
-    "reflect-metadata": "^0.1.13"
-  },
-  "private": true,
-  "nyc": {
-    "extension": [
-      ".ts",
-      ".tsx"
-    ],
-    "exclude": [
-      "**/*.d.ts",
-      "tmp/",
-      "build/"
-    ],
-    "require": [
-      "ts-node/register"
-    ],
-    "sourceMap": true,
-    "instrument": true,
-    "cache": false
+    "typescript": "5.7.2"
   }
 }

@@ -1,6 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true
-  }
+    "outDir": "./build/package",
+    "rootDir": "./src"
+  },
+  "include": [
+    "./src"
+  ]
 }

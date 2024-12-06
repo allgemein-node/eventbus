@@ -44,6 +44,7 @@ export class EventChannel {
   private callSubscriber(o: ISubscriber, obj: any): Promise<any> {
     return new Promise(async (resolve, reject) => {
       try {
+        // @ts-ignore
         const res = await o.object[o.method](obj);
         resolve(res);
       } catch (err) {

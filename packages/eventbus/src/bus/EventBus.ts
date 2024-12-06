@@ -2,7 +2,7 @@ import EventBusMeta from './EventBusMeta';
 import {EventChannel} from './EventChannel';
 import {EventBusConfiguration} from './EventBusConfiguration';
 import {IEventBusConfiguration} from './IEventBusConfiguration';
-import {CryptUtils} from '@allgemein/base/browser';
+import {CryptUtils} from '@allgemein/base/utils/CryptUtils';
 import {EventBusAdapterFactory} from '../adapter/EventBusAdapterFactory';
 import {isEmpty, set, values} from 'lodash';
 import {K_TTL} from '../Constants';
@@ -161,7 +161,8 @@ export class EventBus {
     if (!this.channels[name]) {
       const config = this.getConfiguration(configName);
       const clazz = EventBusMeta.$().getClassForNamespace(name);
-      const channel = new EventChannel(this.nodeId, name, config.createAdapter(this.nodeId, name, clazz, configOpts));
+      const adapter = config.createAdapter(this.nodeId, name, clazz, configOpts);
+      const channel = new EventChannel(this.nodeId, name, adapter);
       this.channels[name] = channel;
     }
     return this.channels[name];

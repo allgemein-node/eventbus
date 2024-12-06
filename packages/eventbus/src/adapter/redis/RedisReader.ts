@@ -26,20 +26,34 @@ export class RedisReader extends AbstractRedisConnection implements IReader {
     this.channel = channel;
     this.topic = topic;
     const _options = clone(options);
+    // @ts-ignore
     this.options = options['reader'] ? merge(_options, _options['reader']) : _options;
   }
 
 
   async close(): Promise<void> {
     const client = await this.getClient(false);
-    return new Promise<void>((resolve, reject) => {
-      try {
-        client.punsubscribe();
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    }).finally(() => this.quit());
+    let error = null;
+    try {
+      await client.pUnsubscribe();
+    } catch (err) {
+      error = err;
+    } finally {
+      await this.quit();
+    }
+
+    if (error) {
+      throw error;
+    }
+
+    // return new Promise<void>((resolve, reject) => {
+    //   try {
+    //
+    //     resolve();
+    //   } catch (e) {
+    //     reject(e);
+    //   }
+    // }).finally(() => this.quit());
   }
 
   /**
@@ -86,24 +100,40 @@ export class RedisReader extends AbstractRedisConnection implements IReader {
    */
   async open() {
     if (this.ready) {
-      return this.channel;
+      return this.ready;
     }
 
+    this.ready = false;
     const client = await this.getClient();
-    return new Promise((resolve, reject) => {
-      client.psubscribe(this.topic + '::*', (err, channel) => {
-        if (err) {
-          err.message = err.message + ' (#open / subscribe)';
-          console.error(err);
-          reject(err);
-        } else {
-          client.on(E_PMESSAGE, this.onPMessage.bind(this));
-          this.ready = true;
-          this.redisChannel = channel;
-          resolve(channel);
-        }
+    try {
+      this.ready = true;
+      // console.log('reader client open');
+      const pattern = this.topic + '::*';
+      client.pSubscribe(pattern, (message: string, channel: string) => {
+        // client.on(E_PMESSAGE, this.onPMessage.bind(this));
+        this.redisChannel = channel;
+        this.onPMessage(pattern, channel, message);
       });
-    });
+    } catch (err) {
+      err.message = err.message + ' (#open / subscribe)';
+      console.error(err);
+      throw err;
+    }
+    return this.ready;
+    // return new Promise((resolve, reject) => {
+    //   client.psubscribe(this.topic + '::*', (err, channel) => {
+    //     if (err) {
+    //       err.message = err.message + ' (#open / subscribe)';
+    //       console.error(err);
+    //       reject(err);
+    //     } else {
+    //       client.on(E_PMESSAGE, this.onPMessage.bind(this));
+    //       this.ready = true;
+    //       this.redisChannel = channel;
+    //       resolve(channel);
+    //     }
+    //   });
+    // });
   }
 
 

@@ -40,7 +40,7 @@ export class RedisEventBusAdapter extends AbstractEventBusAdapter {
     } else {
       return;
     }
-    const sub = await this.getSubscriber();
+    const sub = this.getSubscriber();
     await sub.open();
     this.getEmitter().emit('ready');
     this._ready = true;

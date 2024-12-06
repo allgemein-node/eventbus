@@ -1,12 +1,8 @@
 {
   "compilerOptions": {
-    "lib": [
-      "es5",
-      "es6"
-    ],
     "rootDir": ".",
     "outDir": "./build/compiled",
-    "target": "es6",
+    "target": "es2020",
     "module": "CommonJS",
     "moduleResolution": "node",
     "sourceMap": true,
@@ -19,11 +15,7 @@
     "noImplicitReturns": true,
     "stripInternal": true,
     "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "skipLibCheck": true,
-    "typeRoots": [
-      "./node_modules/@types"
-    ]
+    "skipLibCheck": true
   },
   "exclude": [
     "archive",

@@ -1,12 +1,16 @@
 {
   "name": "@allgemein/eventbus",
-  "version": "0.0.0-PLACEHOLDER",
+  "version": "0.14.2",
   "description": "",
   "main": "index.js",
   "browser": "browser.js",
   "scripts": {
-    "test": "nyc mocha test/functional/*.spec.ts",
-    "posttest": "nyc report --reporter=json && codecov -f coverage/*.json"
+    "build": "node ../../../scripts/build.js",
+    "clean": "npm run clean:build && npm run clean:modules",
+    "clean:build": "rm -rf ../build",
+    "clean:modules": "rm -rf node_modules ../node_modules",
+    "test": "nyc mocha ../test/{**,**/**,**/**/**}/*.spec.ts",
+    "posttest": "nyc report --reporter=json"
   },
   "repository": {
     "type": "git",
@@ -33,11 +37,15 @@
     "allgemein"
   ],
   "dependencies": {
-    "bson": "^4.5.3",
-    "@allgemein/base": "^1.6.2"
+    "bson": "^6.10.1",
+    "@allgemein/base": "^1.7.0"
+  },
+  "devDependencies": {
+    "@types/bson": "^4.2.4",
+    "reflect-metadata": "^0.2.2"
   },
   "peerDependencies": {
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "*"
   },
   "private": true,
   "typexs": {

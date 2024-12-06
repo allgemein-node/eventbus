@@ -8,6 +8,7 @@ import {subscribe} from '../../src/decorator/subscribe';
 import {TestHelper} from './TestHelper';
 import {SpawnHandle} from './SpawnHandle';
 import {RedisEventBusAdapter} from '../../src/adapter/redis/RedisEventBusAdapter';
+import {DEFAULT_REDIS_CONF} from './config';
 
 const LOG_EVENT = TestHelper.logEnable(false);
 
@@ -37,7 +38,7 @@ class TestEventHandler {
   }
 
   wait() {
-    let max = 30;
+    let max = 100;
     const prev = this.collect.length;
     return new Promise((resolve, reject) => {
       const i = setInterval(() => {
@@ -59,15 +60,7 @@ class EventbusRedisSpec {
 
   static async before() {
     EventBus.registerAdapter(RedisEventBusAdapter);
-    await EventBus.$().addConfiguration({
-      name: 'default',
-      adapter: 'redis',
-
-      extra: {
-        host: '127.0.0.1',
-        port: 6379,
-      }
-    });
+    EventBus.$().addConfiguration(DEFAULT_REDIS_CONF);
   }
 
   static async after() {
@@ -78,37 +71,27 @@ class EventbusRedisSpec {
 
   @test
   async 'check eventbus on/off register'() {
-
     const h1 = new TestEventHandler();
     await EventBus.register(h1);
-
     let e = new TestEvent(1);
     EventBus.postAndForget(e);
     await h1.wait();
-
     e = new TestEvent(2);
     EventBus.postAndForget(e);
     await h1.wait();
-
     expect(h1.collect).to.have.length(2);
-
     await EventBus.unregister(h1);
 
     EventBus.postAndForget(new TestEvent(3));
     await TestHelper.wait(100);
-
     expect(h1.collect).to.have.length(2);
-
     await EventBus.register(h1);
-
     EventBus.postAndForget(new TestEvent(4));
     await h1.wait();
-
     expect(h1.collect).to.have.length(3);
-
     await EventBus.unregister(h1);
-
   }
+
 
   @test
   async 'check eventbus spawned reg/unreg'() {

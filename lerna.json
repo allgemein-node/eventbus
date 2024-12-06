@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
+  "version": "independent",
+  "command": {
+    "version": {
+      "ignore": "app|app-auth|testtask",
+      "allowBranch": [
+        "main",
+        "master"
+      ],
+      "preid": "dev",
+      "noPush": true,
+      "gitTagVersion": false,
+      "exact": false,
+      "message": "build: update versions",
+      "push": false,
+      "private": false
+    },
+    "publish": {
+      "allowBranch": [
+        "main",
+        "master"
+      ],
+      "noPush": true,
+      "private": false,
+      "gitReset": true,
+      "directory": "../build/package"
+    }
+  }
+}

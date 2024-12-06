@@ -1,5 +1,6 @@
 import {EventBus} from '../../../src/bus/EventBus';
 import {RedisEventBusAdapter} from '../../../src/adapter/redis/RedisEventBusAdapter';
+import {DEFAULT_REDIS_CONF} from '../config';
 
 class TestEvent {
   id: number;
@@ -10,20 +11,10 @@ class TestEvent {
 }
 
 (async function () {
-  const LOG_EVENT = false; //
   EventBus.registerAdapter(RedisEventBusAdapter);
-  await EventBus.$().addConfiguration({
-    name: 'default',
-    adapter: 'redis',
+  EventBus.$().addConfiguration(DEFAULT_REDIS_CONF);
 
-    extra: {
-      host: '127.0.0.1',
-      port: 6379,
-    }
-  });
-
-  const timeout = 3000;
-
+  const timeout = 5000;
 
   let inc = 0;
   console.log('startup finished');
@@ -33,7 +24,6 @@ class TestEvent {
 
   let running = true;
   process.on(<any>'message', async (m: string) => {
-
     if (m === 'shutdown') {
       console.log('shutdown node');
       running = false;
@@ -42,7 +32,7 @@ class TestEvent {
       process.exit(0);
     } else if (m === 'fire') {
       const id = inc++;
-      // console.log('fire test event ' + id);
+      console.log('fire test event ' + id);
       EventBus.postAndForget(new TestEvent(id));
     }
   });

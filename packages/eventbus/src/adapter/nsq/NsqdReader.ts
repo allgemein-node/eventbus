@@ -88,14 +88,19 @@ export class NsqdReader extends EventEmitter implements INsqdReader {
       const timestamp_sub = parseInt(message.timestamp.toString().substr((tm_str.length - 6)), 0);
 
 
+      // @ts-ignore
+      // @ts-ignore
       const data: INsqSubMessage = {
         id: message.id,
         body: Serializer.deserialize(message.body.toString()),
         // body: message.body.toString(),
         timestamp: timestamp,
         timestamp_sub: timestamp_sub,
+        // @ts-ignore
         receivedOn: message['receivedOn'],
+        // @ts-ignore
         lastTouched: message['lastTouched'],
+        // @ts-ignore
         touchCount: message['touchCount'],
         topic: null,
         message: null
