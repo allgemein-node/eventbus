@@ -10,6 +10,7 @@ export class RedisObject extends AbstractPseudoObject<RedisEventBusAdapter> {
     super(adapter2, eventID, object);
   }
 
+
   async fire() {
     // await this.adapter.getSubscriber();
 
