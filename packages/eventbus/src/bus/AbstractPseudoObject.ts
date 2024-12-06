@@ -5,7 +5,6 @@ import {clearTimeout, setTimeout} from 'timers';
 
 export abstract class AbstractPseudoObject<T extends IEventBusAdapter> implements IPseudoObject {
 
-
   eventID: string;
   uuid: string;
   object: any;
