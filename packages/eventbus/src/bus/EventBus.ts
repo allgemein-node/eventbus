@@ -77,7 +77,6 @@ export class EventBus {
     }
   }
 
-
   private static postOnChannel(namespace: string, o: any, options?: any): Promise<any> {
     return new Promise(async (resolve, reject) => {
       const channel = await this.$().getOrCreateChannel(namespace,

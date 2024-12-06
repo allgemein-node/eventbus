@@ -1,6 +1,6 @@
 {
   "name": "@allgemein/eventbus",
-  "version": "0.14.2",
+  "version": "0.14.4",
   "description": "",
   "main": "index.js",
   "browser": "browser.js",
@@ -37,8 +37,8 @@
     "allgemein"
   ],
   "dependencies": {
-    "bson": "^6.10.1",
-    "@allgemein/base": "^1.7.0"
+    "@allgemein/base": "^1.7.0",
+    "bson": "^6.10.1"
   },
   "devDependencies": {
     "@types/bson": "^4.2.4",
@@ -47,7 +47,6 @@
   "peerDependencies": {
     "reflect-metadata": "*"
   },
-  "private": true,
   "typexs": {
     "name": "eventbus"
   }
