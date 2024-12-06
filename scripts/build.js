@@ -3,37 +3,42 @@ const fs = require('fs');
 const glob = require('glob');
 const exec = util.promisify(require('node:child_process').exec);
 const path = require('node:path');
-const {existsSync} = require('fs');
+const { existsSync } = require('fs');
 
+const deleteKeys = ['private', 'scripts'];
 
 async function build() {
-  const cwd = process.cwd();
-  await exec('npx tsc --build');
-  const targetDir = cwd + '/build/package/src';
+  const cwd = path.join(process.cwd());
+  const packageDir = path.resolve(path.join(cwd, '..'));
+  await exec('npx tsc --build', { cwd: packageDir });
   const packageJson = require(cwd + '/package.json');
   packageJson.main = 'index.js';
   packageJson.browser = 'browser.js';
-  delete packageJson.private;
-  delete packageJson.scripts;
-  fs.writeFileSync(targetDir + '/package.json', JSON.stringify(packageJson, null, 2));
-  if (fs.existsSync(targetDir + '/tsconfig.tsbuildinfo')) {
-    fs.unlinkSync(targetDir + '/tsconfig.tsbuildinfo');
-  }
+  deleteKeys.forEach(x => {
+    delete packageJson[x];
+  });
+  // delete packageJson.publishConfig;
+  fs.writeFileSync(packageDir + '/build/package/package.json', JSON.stringify(packageJson, null, 2));
   // copy json files
-  const files = [].concat(
-    glob.sync(cwd + '/LICENSE', {follow: false}),
-    glob.sync(cwd + '/README*', {follow: false}),
-    glob.sync(cwd + '/src/**/*.json', {follow: false}).filter(x => !/package\.json/.test(x)),
-    glob.sync(cwd + '/src/bin/*', {follow: false}),
-  );
-  files.forEach(x => {
-    const y = x.replace('/src', '').replace(cwd, targetDir);
+  const files = []
+    .concat(
+      glob.sync(packageDir + '/LICENSE', { follow: false }),
+      glob.sync(packageDir + '/README*', { follow: false }),
+      glob.sync(packageDir + '/src/**/*.json', { follow: false }).filter(x => !/package\.json/.test(x)),
+      glob.sync(packageDir + '/src/bin/*', { follow: false })
+    )
+    .filter(x => x.indexOf('node_modules') === -1);
+  const buildDir = path.join(packageDir, 'build', 'package');
+  files.forEach((x) => {
+    let y = x.replace(packageDir, '').replace('/src', ''); //.replace(cwd, packageDir + '/build/package');
+    y = path.join(buildDir, y);
     const dirname = path.dirname(y);
     if (!existsSync(dirname)) {
-      fs.mkdirSync(dirname, {recursive: true});
+      fs.mkdirSync(dirname, { recursive: true });
     }
     fs.writeFileSync(y, fs.readFileSync(x));
   });
+  console.log('');
 }
 
 build().then(x => {
