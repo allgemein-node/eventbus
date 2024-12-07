@@ -41,7 +41,6 @@
     "bson": "^6.10.1"
   },
   "devDependencies": {
-    "@types/bson": "^4.2.4",
     "reflect-metadata": "^0.2.2"
   },
   "peerDependencies": {

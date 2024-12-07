@@ -46,9 +46,14 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.1",
     "@types/nsqjs": "^0.12.4",
-    "@types/redis": "^4.0.11",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
     "chai": "^5.1.2",
     "del": "^8.0.0",
+    "eslint": "9.16.0",
+    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-mocha": "10.5.0",
+    "eslint-plugin-prettier": "5.2.1",
     "lerna": "^8.1.9",
     "mocha": "^11.0.1",
     "mqtt": "^5.10.3",
@@ -56,7 +61,6 @@
     "nyc": "^17.1.0",
     "redis": "^4.7.0",
     "ts-node": "^10.9.2",
-    "tslint": "^6.1.3",
     "typescript": "5.7.2"
   }
 }
